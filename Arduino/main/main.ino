@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #include <SSD1306Ascii.h>
 #include <SSD1306AsciiAvrI2C.h>
 #include <SoftwareSerial.h>
@@ -315,7 +316,111 @@ void mostrarOp(){
     oled.setCursor(x, y);
     oled.print(opMenu[i]);
   }
+=======
+#include <Ultrasonic.h> // Inclui a biblioteca do ultrassônico
 
+Ultrasonic ultrassom(7, 6); // Cria o objeto ultrassom, define os pinos onde está ligado o TRIG(pino 5) e o ECHO(pino 4)
+
+int DF = 8;
+int DT = 9;
+int EF = 10;
+int ET = 11;
+
+long distancia; // Cria a variável distancia do tipo long
+
+unsigned long lastMillis = 0; // Variável para armazenar o último tempo da leitura
+unsigned long intervalo = 100; // Intervalo de tempo para ler o sensor (em milissegundos)
+
+void setup() {
+  Serial.begin(9600); // Inicializa a comunicação serial, com velocidade de comunicação de 9600
+  pinMode(DF, OUTPUT);
+  pinMode(DT, OUTPUT);
+  pinMode(EF, OUTPUT);
+  pinMode(ET, OUTPUT);
+}
+
+void loop() {
+  unsigned long currentMillis = millis(); // Obtém o tempo atual
+>>>>>>> Stashed changes
+
+  // Verifica se já passou o intervalo desejado
+  if (currentMillis - lastMillis >= intervalo) {
+    lastMillis = currentMillis; // Atualiza o último tempo de leitura
+
+    distancia = ultrassom.read(); // Obtém a distância em centímetros (usando o método read)
+    Serial.print("Distância = "); // Imprime na serial o texto "Distância = "
+    Serial.print(distancia); // Imprime na serial o valor da variável distancia
+    Serial.println(" cm"); // Imprime na serial o texto "cm"
+
+    if (distancia <= 30) {  // Correção do erro de comparação
+      conferir();
+    } else {
+      frente();
+    }
+  }
+
+  // Aqui você pode adicionar outras lógicas que não dependem da leitura do sensor
+}
+
+void conferir() {
+  direita();
+  
+  if (distancia >= 30) {
+    frente();
+  } else if (distancia <= 30) {
+    esquerda();
+    delay(1000);
+    esquerda();
+    
+    if (distancia >= 30) {
+      frente();
+    } else if (distancia <= 30) {
+      direita();
+      delay(1000);
+      tras();
+      delay(1000);
+      direita();
+      direita();
+    }
+  }
+}
+
+void direita() {
+  digitalWrite(DT, HIGH);
+  digitalWrite(ET, HIGH);
+  digitalWrite(EF, LOW);
+  digitalWrite(DF, LOW);
+  delay(380);
+  digitalWrite(DT, LOW);
+  digitalWrite(EF, LOW);
+  digitalWrite(ET, LOW);
+  digitalWrite(DF, LOW);
+}
+
+void esquerda() {
+  digitalWrite(DF, LOW);
+  digitalWrite(ET, LOW);
+  digitalWrite(EF, HIGH);
+  digitalWrite(DT, HIGH);
+  delay(380);
+  digitalWrite(DT, LOW);
+  digitalWrite(EF, LOW);
+  digitalWrite(ET, LOW);
+  digitalWrite(DF, LOW);
+}
+
+void frente() {
+  digitalWrite(DF, LOW);
+  digitalWrite(EF, LOW);
+  digitalWrite(ET, HIGH);
+  digitalWrite(DT, HIGH);
+}
+
+void tras() {
+  digitalWrite(DT, LOW);
+  digitalWrite(ET, LOW);
+  digitalWrite(EF, HIGH);  // Corrigido o erro de parêntese
+  digitalWrite(DF, HIGH);
 }
 
 void mostrarTeclado(){
