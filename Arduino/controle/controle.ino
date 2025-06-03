@@ -5,11 +5,11 @@ uint8_t Motor[4] = {4, 5, 6, 7};
 
 int maxValue[2];
 int minValue[2];
-int media[2];
+int values[2];
 
 int P, I, D, erroAnt, PID;
 
-float Kp = 0.6, Kd = 6, Ki = 0;
+float Kp = 0.8, Kd = 1.5, Ki = 0.01;
 
 uint8_t baseSpeed = 120;
 uint8_t Vd, Ve;
@@ -17,14 +17,24 @@ uint8_t Vd, Ve;
 
 void setup() {
 
+  Serial.begin(9600);
+
+  Serial.println("Indo");
+
   for(uint8_t x = 0; x < 4; x++){
     pinMode(Motor[x], OUTPUT);
   }
 
+  Serial.println("motores ok");
+
   pinMode(PWMd, OUTPUT);
   pinMode(PWMe, OUTPUT);
   pinMode(2, INPUT_PULLUP);
+
+  Serial.println("Pinos OK");
   
+  analogWrite(PWMd, baseSpeed);
+  analogWrite(PWMe, baseSpeed);
   calibrar();
 
   while(true){
@@ -33,59 +43,100 @@ void setup() {
     }
   }
 
-  digitalWrite(Motor[0], HIGH);
-  digitalWrite(Motor[1], LOW);
-  digitalWrite(Motor[2], LOW);
-  digitalWrite(Motor[3], HIGH);
-
 }
 
 void loop() {
-  int erro = (analogRead(0) - analogRead(1));
+
+  digitalWrite(Motor[0], HIGH);
+  digitalWrite(Motor[1], LOW);
+  digitalWrite(Motor[2], HIGH);
+  digitalWrite(Motor[3], LOW);
+
+  ler();
+
+  int erro = values[0] - values[1];
 
   P = erro;
   I = I + erro;
   D = erro - erroAnt;
 
+  erroAnt = erro;
+
   PID = (Kp * P) + (Ki * I) + (Kd * D);
 
-  erroAnt = erro;
-  Ve = (baseSpeed - PID);
-  Vd = (baseSpeed + PID);
+
+  Ve = baseSpeed - PID;
+  Vd = baseSpeed + PID;
+
+  analogWrite(PWMd, Vd);
+  analogWrite(PWMe, Ve);
+
+  Serial.print(erro);
+  Serial.print(" ");
+  Serial.print(Vd);
+  Serial.print(" ");
+  Serial.print(Ve);
+  Serial.print(" ");
+  Serial.print(analogRead(A0));
+  Serial.print(" ");
+  Serial.println(analogRead(A1));
   
 
 }
 
 void calibrar(){
+
+  Serial.println("Iniciando calibração");
+
+
   for(uint8_t x = 0; x < 2; x++){
     minValue[x] = analogRead(x);
     maxValue[x] = analogRead(x);
   }
+  
+  Serial.println("p2");
 
-  for(uint8_t x = 0; x <= 2000; x++){
+  for(int x = 0; x < 2000; x++){
+    
+    analogWrite(PWMe, baseSpeed);
+    analogWrite(PWMd, baseSpeed);
+
     digitalWrite(Motor[0], HIGH);
     digitalWrite(Motor[1], LOW);
     digitalWrite(Motor[2], LOW);
     digitalWrite(Motor[3], HIGH);
-    analogWrite(PWMe, baseSpeed);
-    analogWrite(PWMd, baseSpeed);
 
-    for(uint8_t x = 0; x < 2; x++){
-      int read = analogRead(x);
-      if(read < minValue[x]){
-        minValue[x] = read;
+    for(uint8_t i = 0; i < 2; i++){
+      
+      int leitura = analogRead(i);
+      
+      if(leitura < minValue[i]){
+        minValue[i] = leitura;
       }
 
-      if(read > maxValue[x]){
-        maxValue[x] = read;
+      if(leitura > maxValue[i]){
+        maxValue[i] = leitura;
       }
     }
   }
+  
+  Serial.println("P3");
 
-  for(uint8_t x = 0; x < 2; x++){
-    media[x] = (minValue[x] + maxValue[x]) / 2;
-    Serial.println(media[x]);
-  }
+  digitalWrite(Motor[0], LOW);
+  digitalWrite(Motor[1], LOW);
+  digitalWrite(Motor[2], LOW);
+  digitalWrite(Motor[3], LOW);
 
   Serial.println("Calibrado");
+}
+
+
+
+void ler(){
+  
+  for(int i = 0; i < 2; i++){
+    //values[i] = map(analogRead(i), minValue[i], maxValue[i], 0, 100);
+    values[i] = map(analogRead(i), 0, 1023, 0, 100);
+  }
+  
 }
