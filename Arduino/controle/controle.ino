@@ -7,7 +7,7 @@ int maxValue[2];
 int minValue[2];
 int maxValueConta[2];
 int minValueConta[2];
-int NumMin[2]{1,1}, NumMax[2]{1,1}; 
+int NumMin[2], NumMax[2]; 
 int values[2];
 
 int P, I, D, erroAnt, PID;
