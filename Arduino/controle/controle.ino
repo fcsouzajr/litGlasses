@@ -1,4 +1,4 @@
-uint8_t Motor[4] = {4, 5, 6, 7};
+uint8_t Motor[] = {4, 5, 6, 7};
 
 #define PWMd 10
 #define PWMe 9
@@ -11,7 +11,7 @@ int P, I, D, erroAnt, PID;
 
 float Kp = 0.8, Kd = 1.5, Ki = 0.01;
 
-uint8_t baseSpeed = 120;
+uint8_t baseSpeed = 255;
 uint8_t Vd, Ve;
 
 
@@ -47,12 +47,12 @@ void setup() {
 
 void loop() {
 
-  digitalWrite(Motor[0], HIGH);
-  digitalWrite(Motor[1], LOW);
-  digitalWrite(Motor[2], HIGH);
-  digitalWrite(Motor[3], LOW);
+  digitalWrite(4, HIGH);
+  digitalWrite(5, LOW);
+  digitalWrite(6, HIGH);
+  digitalWrite(7, LOW);
 
-  ler();
+  /*ler();
 
   int erro = values[0] - values[1];
 
@@ -66,12 +66,12 @@ void loop() {
 
 
   Ve = baseSpeed - PID;
-  Vd = baseSpeed + PID;
+  Vd = baseSpeed + PID;*/
 
-  analogWrite(PWMd, Vd);
-  analogWrite(PWMe, Ve);
+  analogWrite(PWMd, 255);
+  analogWrite(PWMe, 255);
 
-  Serial.print(erro);
+  /*Serial.print(erro);
   Serial.print(" ");
   Serial.print(Vd);
   Serial.print(" ");
@@ -79,7 +79,7 @@ void loop() {
   Serial.print(" ");
   Serial.print(analogRead(A0));
   Serial.print(" ");
-  Serial.println(analogRead(A1));
+  Serial.println(analogRead(A1));*/
   
 
 }
@@ -87,6 +87,11 @@ void loop() {
 void calibrar(){
 
   Serial.println("Iniciando calibração");
+
+  digitalWrite(Motor[0], HIGH);
+  digitalWrite(Motor[1], LOW);
+  digitalWrite(Motor[2], LOW);
+  digitalWrite(Motor[3], HIGH);
 
 
   for(uint8_t x = 0; x < 2; x++){
@@ -96,15 +101,7 @@ void calibrar(){
   
   Serial.println("p2");
 
-  for(int x = 0; x < 2000; x++){
-    
-    analogWrite(PWMe, baseSpeed);
-    analogWrite(PWMd, baseSpeed);
-
-    digitalWrite(Motor[0], HIGH);
-    digitalWrite(Motor[1], LOW);
-    digitalWrite(Motor[2], LOW);
-    digitalWrite(Motor[3], HIGH);
+  for(int x = 0; x < 3000; x++){
 
     for(uint8_t i = 0; i < 2; i++){
       
@@ -118,6 +115,7 @@ void calibrar(){
         maxValue[i] = leitura;
       }
     }
+    delay(1);
   }
   
   Serial.println("P3");
@@ -135,8 +133,8 @@ void calibrar(){
 void ler(){
   
   for(int i = 0; i < 2; i++){
-    //values[i] = map(analogRead(i), minValue[i], maxValue[i], 0, 100);
-    values[i] = map(analogRead(i), 0, 1023, 0, 100);
+    values[i] = map(analogRead(i), minValue[i], maxValue[i], 0, 100);
+    //values[i] = map(analogRead(i), 0, 1023, 0, 100);
   }
   
 }
