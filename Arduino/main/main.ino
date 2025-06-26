@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 #include <SSD1306Ascii.h>
 #include <SSD1306AsciiAvrI2C.h>
 #include <SoftwareSerial.h>
@@ -39,6 +38,7 @@ static bool antCondi = false; //
 struct opData {
   const char* mensagem; //mensagem que aparece no display
   const char* comandoSerial; //codigo que é enviado por comunicação UART
+  bool state = false; //vai mostrar o estado que está o pino em questão
 };
 
 opData Sala[] = {
@@ -47,28 +47,35 @@ opData Sala[] = {
   {"TV", "2"}
 };
 
-opData Quarto[] = {
+opData Quarto1[] = {
   {"RELE 1", "3"},
   {"RELE 2", "4"},
   {"TV", "5"}
 };
 
-opData Cozinha[] = {
+opData Quarto2[] = {
   {"RELE 1", "6"},
   {"RELE 2", "7"},
-  {"Eletro", "8"}
+  {"TV", "8"}
+}
+
+opData Cozinha[] = {
+  {"RELE 1", "9"},
+  {"RELE 2", "10"},
+  {"Eletro", "11"}
 };
 
 //textos dos menus
 const char* menuPrincipal[] = {"Comunicacao", "Automacao"};
 const char* subMenuComunicacao[] = {"Digitar"};
-const char* subMenuAutomacao[] = {"Sala", "Quarto", "Cozinha"};
+const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
 //teclado
 const char* tecladoABC []= {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L","M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"," "};
 //opções do submenu automação
 const char* opSala[] = {"Rele 1", "Rele 2", "TV"};
-const char* opQuarto[] = {"Rele 1", "Rele 2", "TV"};
-const char* opCozinha[] = {"Rele 1", "Rele 2", "Eletrodomestico"};
+const char* opQuarto1[] = {"Rele 1", "Rele 2", "TV"};
+const char* opQuarto2[] = {"Rele 1", "Rele 2", "TV"};
+const char* opCozinha[] = {"Rele 1", "Rele 2", "Eletro"};
 
 // Variáveis para controle de menu
 uint8_t indice = 0;
@@ -282,7 +289,7 @@ void mostrarOp(){
   oled.clear();
 
   const char** opMenu; //vetor que vai receber outro vetor
-  uint8_t tamanho;
+  uint8_t tamanho; //saber quantas opções tem em cada struct
 
   switch (opAtual) {
     case 1:
@@ -290,18 +297,27 @@ void mostrarOp(){
       oled.print(F("Sala-Auto"));
       opMenu = opSala;
       tamanho = sizeof(opSala) / sizeof(opSala[0]);
+      Cell.print("BTAUTO S"); //envia pro aplicativo que tá na opção se sala
     break;
     case 2:
       oled.setCursor(0, 0);
-      oled.print(F("Quarto-Auto"));
-      opMenu = opQuarto;
-      tamanho = sizeof(opQuarto) / sizeof(opQuarto[0]);
+      oled.print(F("Quarto1-Auto"));
+      opMenu = opQuarto1;
+      tamanho = sizeof(opQuarto1) / sizeof(opQuarto1[0]);
+      Cell.print("BTAUTO Q1"); //envia para o aplicativo que tá na opção de quarto 1
     break;
     case 3:
+      oled.setCursor(0,0);
+      oled.print(F("Quarto2-Auto"));
+      opMenu = opQuarto2;
+      tamanho = sizeof(opQuarto2) / sizeof(opQuarto2[0]);
+      Cell.print("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
+    case 4:
       oled.setCursor(0, 0);
       oled.print(F("Cozinha-Auto"));
       opMenu = opCozinha;
       tamanho = sizeof(opCozinha) / sizeof(opCozinha[0]);
+      Cell.print("BTAUTO C"); //envia para o aplicativo que tá na opção da cozinha 
     break;
   }
 
@@ -317,8 +333,9 @@ void mostrarOp(){
       oled.setInvertMode(false);
     }
     oled.setCursor(x, y);
-    oled.print(opMenu[i]);
+    oled.print(opMenu[i]); //vai imprimir a opção que tá no vetor
   }
+}
 
 void mostrarTeclado(){
   oled.clear();
@@ -355,28 +372,29 @@ void mostrarTeclado(){
 }
 
 void executar(){
-  if(emOp){
+  if(emOp){ //se estiver em uma opção, irá executar a opção selecionada
     executarOp();
   }else if(emSub){
-    if(digitar){
+    if(digitar){ //se digitar = true, vai executar a frase
       executarFrase();
     }else{
-      opAtual = indice + 1;
+      opAtual = indice + 1; //se não, vai entrar na opção que selecinou no menu de automação
       emOp = true;
       emSub = false;
       indice = 0;
       mostrarOp();
     }
   }else{
-    menuAtual = indice + 1;
+    menuAtual = indice + 1; //se menuAutal = 1 comunicação, se = 2 é de automção
     emSub = true;
     emOp = false;
     indice = 0;
-    if(menuAtual == 1){
-      digitar = true;
+    if(menuAtual == 1){ //se estiver em comunicão, vai mostrar o teclado
+      digitar = true; 
       mostrarTeclado();
     }else{
-      mostrarSubMenu();
+      mostrarSubMenu(); //se tiver em automação vai mostrar as subopções (Quarto1 etc) de automação
+      Cell.print("BTAUTO");
     }
   }
 }
@@ -390,7 +408,7 @@ void executarOp(){
     break;
 
     case 2:
-      dados = Quarto;
+      dados = Quarto1;
     break;
 
     case 3: 
@@ -405,6 +423,8 @@ void executarOp(){
   oled.setCursor(0, 0);
   oled.print(dados[indice].mensagem);
   Tx.print(dados[indice].comandoSerial);
+  dados[indice].state = !dados[indice].state;
+  Cell.print(String(dados[indice].mensagem) + (dados[indice].state ? " ON" : " OFF"));
   delay(2000);
   oled.clear();
   mostrarOp();
@@ -419,7 +439,7 @@ void executarFrase(){
   if(!arquivo){
     Serial.println("Erro ao abrir");
     return;
-  }
+  }                                                                                                                        
 
   contador = 0;
   String palavra;
