@@ -38,31 +38,31 @@ static bool antCondi = false; //
 struct opData {
   const char* mensagem; //mensagem que aparece no display
   const char* comandoSerial; //codigo que é enviado por comunicação UART
-  bool state = false; //vai mostrar o estado que está o pino em questão
+  bool state; //vai mostrar o estado que está o pino em questão
 };
 
 opData Sala[] = {
-  {"RELE 1", "0"},
-  {"RELE 2", "1"},
-  {"TV", "2"}
+  {"RELE 1", "0", false},
+  {"RELE 2", "1", false},
+  {"TV", "2", false}
 };
 
 opData Quarto1[] = {
-  {"RELE 1", "3"},
-  {"RELE 2", "4"},
-  {"TV", "5"}
+  {"RELE 1", "3", false},
+  {"RELE 2", "4", false},
+  {"TV", "5", false}
 };
 
 opData Quarto2[] = {
-  {"RELE 1", "6"},
-  {"RELE 2", "7"},
-  {"TV", "8"}
-}
+  {"RELE 1", "6", false},
+  {"RELE 2", "7", false},
+  {"TV", "8", false}
+};
 
 opData Cozinha[] = {
-  {"RELE 1", "9"},
-  {"RELE 2", "10"},
-  {"Eletro", "11"}
+  {"RELE 1", "9", false},
+  {"RELE 2", "10", false},
+  {"Eletro", "11", false}
 };
 
 //textos dos menus
