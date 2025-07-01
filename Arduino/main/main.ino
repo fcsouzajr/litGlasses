@@ -16,7 +16,7 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 #define led 7
 
 #define Colunas 3 //configuração para as colunas e a largura (em pixeis);
-#define Largura 40;
+#define Largura 40
 
 String fraseDigitada = ""; //indica a frase que está sendo digitada
 String palavrasCorretas[3];  // Para armazenar até 3 palavras corretas
@@ -25,6 +25,7 @@ String fraseFinal = ""; //frase que aparece no final, que foi escrita
 int8_t indiceN = -1; //para selecionar a palavra indicada que tu quer escrever (é -1 pq posso adicionar +1 no codgo sem se preocupar)
 static bool emSelecionar = false; //Saber se está navegando entre as letras ou aa palavras indicadas
 int cont = 0; //contador para saber se está navegandoi no teclado ou nas opções de palavra
+unsigned long tempo;
 
 unsigned long UltimoClique; //Variaveis para contar cliques no botão 1
 uint8_t Contador = 0; //contador de cliques
@@ -38,31 +39,31 @@ static bool antCondi = false; //
 struct opData {
   const char* mensagem; //mensagem que aparece no display
   const char* comandoSerial; //codigo que é enviado por comunicação UART
-  bool state = false; //vai mostrar o estado que está o pino em questão
+  bool state;; //vai mostrar o estado que está o pino em questão
 };
 
 opData Sala[] = {
-  {"RELE 1", "0"},
-  {"RELE 2", "1"},
-  {"TV", "2"}
+  {"RELE 1", "0", false},
+  {"RELE 2", "1", false},
+  {"TV", "2", false}
 };
 
 opData Quarto1[] = {
-  {"RELE 1", "3"},
-  {"RELE 2", "4"},
+  {"RELE 1", "3", false},
+  {"RELE 2", "4", false},
   {"TV", "5"}
 };
 
 opData Quarto2[] = {
-  {"RELE 1", "6"},
-  {"RELE 2", "7"},
-  {"TV", "8"}
-}
+  {"RELE 1", "6", false},
+  {"RELE 2", "7", false},
+  {"TV", "8", false}
+};
 
 opData Cozinha[] = {
-  {"RELE 1", "9"},
-  {"RELE 2", "10"},
-  {"Eletro", "11"}
+  {"RELE 1", "9", false},
+  {"RELE 2", "10", false},
+  {"Eletro", "11", false}
 };
 
 //textos dos menus
@@ -86,6 +87,7 @@ static bool emOp = false; //saber se está nas opç~es de submenu
 static bool digitar = false; //variável para saber se está no modo de digitação
 
 void setup() {
+  tempo = millis();
   Tx.begin(9600); //definindo baund rate do modulo bluetooth
   Cell.begin(9600);
   Serial.begin(9600);
@@ -101,6 +103,7 @@ void setup() {
   pinMode(Bot, INPUT_PULLUP); //definindo os pinos como de entrada com resistor interno
   pinMode(Bot2, INPUT_PULLUP);
   mostrarMenu();
+  Serial.println(millis() - tempo);
 }
 
 void loop() {
@@ -114,12 +117,14 @@ void loop() {
   digitalWrite(led, Condi);
   bot1();
   bot2();
-  Serial.print("emSub: "); Serial.println(emSub);
+
+  /*Serial.print("emSub: "); Serial.println(emSub);
   Serial.print("emOp: "); Serial.println(emOp);
   Serial.print("digitar: "); Serial.println(digitar);
   Serial.print("emSelecionar: "); Serial.println(emSelecionar);
   Serial.println("----------------------");
-  Serial.println(fraseFinal);
+  Serial.println(fraseFinal);*/
+
   delay(50);
 }
 
@@ -431,6 +436,9 @@ void executarOp(){
 }
 
 void executarFrase(){
+
+  tempo = millis();
+  
   fraseDigitada += tecladoABC[indice];
 
   String nomeArquivo = String(fraseDigitada[0]) + ".txt";
@@ -457,6 +465,8 @@ void executarFrase(){
   }
   arquivo.close();
   mostrarTeclado();
+
+  Serial.println(millis() - tempo);
 }
 
 void navegar(int num){
