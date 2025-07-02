@@ -42,33 +42,36 @@ struct opData {
 };
 
 opData Sala[] = {
-  {"RELE 1", "0", false},
-  {"RELE 2", "1", false},
+  {"RELE1", "0", false},
+  {"RELE2", "1", false},
   {"TV", "2", false}
 };
 
 opData Quarto1[] = {
-  {"RELE 1", "3", false},
-  {"RELE 2", "4", false},
+  {"RELE1", "3", false},
+  {"RELE2", "4", false},
   {"TV", "5", false}
 };
 
 opData Quarto2[] = {
-  {"RELE 1", "6", false},
-  {"RELE 2", "7", false},
+  {"RELE1", "6", false},
+  {"RELE2", "7", false},
   {"TV", "8", false}
 };
 
 opData Cozinha[] = {
-  {"RELE 1", "9", false},
-  {"RELE 2", "10", false},
+  {"RELE1", "9", false},
+  {"RELE2", "10", false},
   {"Eletro", "11", false}
 };
 
+
+
 //textos dos menus
-const char* menuPrincipal[] = {"Comunicacao", "Automacao"};
+const char* menuPrincipal[] = {"Comunicacao", "Automacao", "Mensagem"};
 const char* subMenuComunicacao[] = {"Digitar"};
 const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
+const char* subMenuMensagem[] = {"Perigo", "Nescessidade"};
 //teclado
 const char* tecladoABC []= {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L","M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"," "};
 //opções do submenu automação
@@ -111,15 +114,79 @@ void loop() {
     LimiteTempo = 1000;
   }
 
+  if(Cell.available() > 0){
+    String recebido = Cell.readString();
+
+    if(recebido == "SALA"){
+      menuAtual = 2;
+      opAtual = 1; //se não, vai entrar na opção que selecinou no menu de automação
+      emOp = true;
+      emSub = false;
+      indice = 0;
+      mostrarOp();
+    }else if(recebido == "QUARTO1"){
+      menuAtual = 2;
+      opAtual = 2; //se não, vai entrar na opção que selecinou no menu de automação
+      emOp = true;
+      emSub = false;
+      indice = 0;
+      mostrarOp();
+    }else if(recebido == "QUARTO2"){
+      menuAtual = 2;
+      opAtual = 3; //se não, vai entrar na opção que selecinou no menu de automação
+      emOp = true;
+      emSub = false;
+      indice = 0;
+      mostrarOp();
+    }else if(recebido == "COZINHA"){
+      menuAtual = 2;
+      opAtual = 4; //se não, vai entrar na opção que selecinou no menu de automação
+      emOp = true;
+      emSub = false;
+      indice = 0;
+      mostrarOp();
+    }else if(recebido == "TECLADOON"){
+      menuAtual = 1;
+      digitar = true; 
+      mostrarTeclado();
+    }else if(recebido == "VM"){
+
+      menuAtual = 0;
+      digitar = false;
+      emOp = false;
+      emSub = false;
+      indice = 0;
+
+      mostrarMenu();
+    }else if(recebido == "AUTOMACAOON"){
+
+      menuAtual = 2;
+      mostrarSubMenu();
+    }else if(recebido == "LAMPADA1Q1"){
+
+      Quarto1[0].state = !Quarto1[0].state;
+      Tx.print(Quarto1[0].comandoSerial);
+
+    }else if(recebido == "LAMPADA2Q1"){
+      Quarto1[1].state = !Quarto1[1].state;
+      Tx.print(Quarto1[1].comandoSerial);
+
+    }else if(recebido == "PORTA1Q1"){
+      Quarto1[2].state = !Quarto1[2].state;
+      Tx.print(Quarto1[2].comandoSerial);
+
+    }
+  }
+
   digitalWrite(led, Condi);
   bot1();
   bot2();
-  Serial.print("emSub: "); Serial.println(emSub);
+  /*Serial.print("emSub: "); Serial.println(emSub);
   Serial.print("emOp: "); Serial.println(emOp);
   Serial.print("digitar: "); Serial.println(digitar);
   Serial.print("emSelecionar: "); Serial.println(emSelecionar);
   Serial.println("----------------------");
-  Serial.println(fraseFinal);
+  Serial.println(fraseFinal);*/
   delay(50);
 }
 
@@ -208,14 +275,14 @@ void bot2() {
       }
     }else if (Contador2 == 3 && Condi) {
       if(digitar){
-        indice = 0;
+        indiceN = -1;
+        cont = 0;
         digitar = false;
-        emOp = false;
         emSub = false;
         emSelecionar = false;
         oled.clear();
         oled.print(fraseFinal);
-        Cell.print(fraseFinal); //mandando a frase para o celular
+        Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
         delay(3000);
         fraseDigitada = "";
         fraseFinal = "";
@@ -238,6 +305,8 @@ void bot2() {
         emOp = false;
         emSub = false;
         indice = 0;
+        Cell.println("VOLTAR");
+
         mostrarMenu();
       }
     }
@@ -297,27 +366,27 @@ void mostrarOp(){
       oled.print(F("Sala-Auto"));
       opMenu = opSala;
       tamanho = sizeof(opSala) / sizeof(opSala[0]);
-      Cell.print("BTAUTO S"); //envia pro aplicativo que tá na opção se sala
+      Cell.println("BTAUTO S"); //envia pro aplicativo que tá na opção se sala
     break;
     case 2:
       oled.setCursor(0, 0);
       oled.print(F("Quarto1-Auto"));
       opMenu = opQuarto1;
       tamanho = sizeof(opQuarto1) / sizeof(opQuarto1[0]);
-      Cell.print("BTAUTO Q1"); //envia para o aplicativo que tá na opção de quarto 1
+      Cell.println("BTAUTO Q1"); //envia para o aplicativo que tá na opção de quarto 1
     break;
     case 3:
       oled.setCursor(0,0);
       oled.print(F("Quarto2-Auto"));
       opMenu = opQuarto2;
       tamanho = sizeof(opQuarto2) / sizeof(opQuarto2[0]);
-      Cell.print("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
+      Cell.println("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
     case 4:
       oled.setCursor(0, 0);
       oled.print(F("Cozinha-Auto"));
       opMenu = opCozinha;
       tamanho = sizeof(opCozinha) / sizeof(opCozinha[0]);
-      Cell.print("BTAUTO C"); //envia para o aplicativo que tá na opção da cozinha 
+      Cell.println("BTAUTO C"); //envia para o aplicativo que tá na opção da cozinha 
     break;
   }
 
@@ -335,6 +404,7 @@ void mostrarOp(){
     oled.setCursor(x, y);
     oled.print(opMenu[i]); //vai imprimir a opção que tá no vetor
   }
+
 }
 
 void mostrarTeclado(){
@@ -377,12 +447,17 @@ void executar(){
   }else if(emSub){
     if(digitar){ //se digitar = true, vai executar a frase
       executarFrase();
-    }else{
+    }else if(menuAtual == 2){
       opAtual = indice + 1; //se não, vai entrar na opção que selecinou no menu de automação
       emOp = true;
       emSub = false;
       indice = 0;
       mostrarOp();
+    }else{
+      opAtual = indice + 1; //entra na opção de mensagem que você selecionou
+      indice = 0;
+      mostrarMsg();
+      mostrarSubMensagem();
     }
   }else{
     menuAtual = indice + 1; //se menuAutal = 1 comunicação, se = 2 é de automção
@@ -392,11 +467,48 @@ void executar(){
     if(menuAtual == 1){ //se estiver em comunicão, vai mostrar o teclado
       digitar = true; 
       mostrarTeclado();
-    }else{
+      Cell.println("BTTECLADO");
+    }else if(menuAtual == 2){
       mostrarSubMenu(); //se tiver em automação vai mostrar as subopções (Quarto1 etc) de automação
-      Cell.print("BTAUTO");
+      Cell.println("BTAUTOMACAO");
+    }else{
+      mostrarSubMensagem();
+      Cell.println("BTMSG");
     }
   }
+}
+
+void mostrarSubMensagem(){
+  oled.clear();
+
+  indice %= sizeof(subMenuMensagem) / sizeof(subMenuMensagem[0]);
+
+  for(uint8_t i = 0; i < sizeof(subMenuMensagem) / sizeof(subMenuMensagem[0]); i++){
+    uint8_t x = (i % Colunas) * Largura;
+    uint8_t y = (i / Colunas) + 1;
+
+    if(i == indice){
+      oled.setInvertMode(true);
+    }else{
+      oled.setInvertMode(false);
+    }
+    oled.setCursor(x, y);
+    oled.print(subMenuMensagem[i]);
+  }
+}
+
+void mostrarMsg(){
+
+  oled.clear();
+
+  if(opAtual == 1){
+    Cell.println("Estou em perigo");
+    oled.print("Perigo");
+  }else if(opAtual == 2){
+    Cell.println("Nescessito");
+    oled.print("Ajuda");
+  }
+  delay(500);
 }
 
 void executarOp(){
@@ -424,7 +536,7 @@ void executarOp(){
   oled.print(dados[indice].mensagem);
   Tx.print(dados[indice].comandoSerial);
   dados[indice].state = !dados[indice].state;
-  Cell.print(String(dados[indice].mensagem) + (dados[indice].state ? " ON" : " OFF"));
+  Cell.println(String(dados[indice].mensagem) + (dados[indice].state ? "ON" : "OFF"));
   delay(2000);
   oled.clear();
   mostrarOp();
@@ -471,8 +583,10 @@ void navegar(int num){
   }else if(emSub){
     if(digitar){
       mostrarTeclado();
-    }else{
+    }else if(menuAtual == 2){
       mostrarSubMenu();
+    }else{
+      mostrarSubMensagem();
     }
   }else{
     mostrarMenu();
