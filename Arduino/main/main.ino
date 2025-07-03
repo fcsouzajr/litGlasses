@@ -33,6 +33,7 @@ uint8_t Contador2 = 0;
 int LimiteTempo = 1000; //limite de tempo para piscar, ou seja 1 segundo
 static bool Condi = false;
 static bool antCondi = false; //
+static bool execut = false;
 
 //Estrutura e controle de opções
 struct opData {
@@ -63,6 +64,26 @@ opData Cozinha[] = {
   {"RELE1", "9", false},
   {"RELE2", "10", false},
   {"Eletro", "11", false}
+};
+
+typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
+
+struct Comando{
+  const char* nome;
+  funcMain func;
+};
+
+Comando cmds[] = {
+  {"AUTON", funcAUTON}, //comando para ir pro submenu automação
+  {"TCLN", funcTCLN}, //comando pra ir pro submenu de teclado
+  {"SALA", funcSALA}, //comando para ir pras opções de sala
+  {"QRT1", funcQRT1}, //comando para ir pras opções de quarto 1
+  {"QRT2", funcQRT2}, //comando pra ir pras opções de quarto 2
+  {"CZNH", funcCZNH}, //comando pra ir pras opções da cozinha
+  {"VM", funcVM}, //comando para voltar pro menu principal
+  {"RL1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
+  {"RL2Q1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
+  {"TVQ1", funcTVQ1} //comando para selecionar opção de TV do quarto 1
 };
 
 
@@ -114,68 +135,24 @@ void loop() {
     LimiteTempo = 1000;
   }
 
-  if(Cell.available() > 0){
-    String recebido = Cell.readString();
+  if(Cell.available()){
 
-    if(recebido == "SALA"){
-      menuAtual = 2;
-      opAtual = 1; //se não, vai entrar na opção que selecinou no menu de automação
-      emOp = true;
-      emSub = false;
-      indice = 0;
-      mostrarOp();
-    }else if(recebido == "QUARTO1"){
-      menuAtual = 2;
-      opAtual = 2; //se não, vai entrar na opção que selecinou no menu de automação
-      emOp = true;
-      emSub = false;
-      indice = 0;
-      mostrarOp();
-    }else if(recebido == "QUARTO2"){
-      menuAtual = 2;
-      opAtual = 3; //se não, vai entrar na opção que selecinou no menu de automação
-      emOp = true;
-      emSub = false;
-      indice = 0;
-      mostrarOp();
-    }else if(recebido == "COZINHA"){
-      menuAtual = 2;
-      opAtual = 4; //se não, vai entrar na opção que selecinou no menu de automação
-      emOp = true;
-      emSub = false;
-      indice = 0;
-      mostrarOp();
-    }else if(recebido == "TECLADOON"){
-      menuAtual = 1;
-      digitar = true; 
-      mostrarTeclado();
-    }else if(recebido == "VM"){
+    char recebido[6];
+    int len = Serial.readBytesUntil('\n', recebido, sizeof(recebido) - 1);
+    recebido[len] = '\0'; // completa o char para usar os métodos de C
 
-      menuAtual = 0;
-      digitar = false;
-      emOp = false;
-      emSub = false;
-      indice = 0;
-
-      mostrarMenu();
-    }else if(recebido == "AUTOMACAOON"){
-
-      menuAtual = 2;
-      mostrarSubMenu();
-    }else if(recebido == "LAMPADA1Q1"){
-
-      Quarto1[0].state = !Quarto1[0].state;
-      Tx.print(Quarto1[0].comandoSerial);
-
-    }else if(recebido == "LAMPADA2Q1"){
-      Quarto1[1].state = !Quarto1[1].state;
-      Tx.print(Quarto1[1].comandoSerial);
-
-    }else if(recebido == "PORTA1Q1"){
-      Quarto1[2].state = !Quarto1[2].state;
-      Tx.print(Quarto1[2].comandoSerial);
-
+    for(uint8_t x = 0; x < sizeof(cmds) / sizeof(cmds[0]); x++){ //fica repetindo 
+      if(strcmp(recebido, cmds[x].nome) == 0){ //se o dado recebido for = nome 
+        cmds[x].func(); //executa a função
+        break; //para o loop
+      }
     }
+
+    if(execut){
+      Cell.println(F("OK")); //manda pro app que deu certo
+      execut = false;
+    }
+
   }
 
   digitalWrite(led, Condi);
@@ -386,7 +363,7 @@ void mostrarOp(){
       oled.print(F("Cozinha-Auto"));
       opMenu = opCozinha;
       tamanho = sizeof(opCozinha) / sizeof(opCozinha[0]);
-      Cell.println("BTAUTO C"); //envia para o aplicativo que tá na opção da cozinha 
+      Cell.println(F("BTAUTO C")); //envia para o aplicativo que tá na opção da cozinha 
     break;
   }
 
@@ -605,3 +582,58 @@ void navegarSelecionar(){
     mostrarTeclado();
   }
 }
+
+void funcTCLN(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcAUTON(){
+  indice = 1;
+  executar();
+  execut = true;
+}
+
+void funcSALA(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcQRT1(){
+  indice = 1;
+  executar():
+  execut = true;
+}
+
+void funcQRT2(){
+  indice = 2;
+  executar();
+  execut = true;
+}
+
+void funcCZNH(){
+  indice = 3;
+  executar():
+  execut = true;
+}
+
+void funcRL1Q1(){
+  indice = 0;
+  executar():
+  execut = true;
+}
+
+void funcRL2Q1(){
+  idnice = 1;
+  executar():
+  execut = true;
+}
+
+void funcTVQ1(){
+  indice = 2;
+  executar();
+  execut = true;
+}
+
