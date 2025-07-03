@@ -68,6 +68,18 @@ opData Cozinha[] = {
 
 typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
 
+void funcAUTON();
+void funcTCLN();
+void funcSALA();
+void funcQRT1();
+void funcQRT2();
+void funcCZNH();
+void funcVM();
+void funcRL1Q1();
+void funcRL2Q1();
+void funcTVQ1();
+
+
 struct Comando{
   const char* nome;
   funcMain func;
@@ -83,7 +95,8 @@ Comando cmds[] = {
   {"VM", funcVM}, //comando para voltar pro menu principal
   {"RL1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
   {"RL2Q1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
-  {"TVQ1", funcTVQ1} //comando para selecionar opção de TV do quarto 1
+  {"TVQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
+  {"VM", funcVM}
 };
 
 
@@ -135,11 +148,15 @@ void loop() {
     LimiteTempo = 1000;
   }
 
-  if(Cell.available()){
+  if(Cell.available() > 0){
 
-    char recebido[6];
-    int len = Serial.readBytesUntil('\n', recebido, sizeof(recebido) - 1);
+    Serial.print(F("RECEBIDO"));
+
+    char recebido[8];
+    int len = Cell.readBytesUntil('\n', recebido, 8);
     recebido[len] = '\0'; // completa o char para usar os métodos de C
+
+    Serial.print(recebido);
 
     for(uint8_t x = 0; x < sizeof(cmds) / sizeof(cmds[0]); x++){ //fica repetindo 
       if(strcmp(recebido, cmds[x].nome) == 0){ //se o dado recebido for = nome 
@@ -603,7 +620,7 @@ void funcSALA(){
 
 void funcQRT1(){
   indice = 1;
-  executar():
+  executar();
   execut = true;
 }
 
@@ -615,19 +632,19 @@ void funcQRT2(){
 
 void funcCZNH(){
   indice = 3;
-  executar():
+  executar();
   execut = true;
 }
 
 void funcRL1Q1(){
   indice = 0;
-  executar():
+  executar();
   execut = true;
 }
 
 void funcRL2Q1(){
-  idnice = 1;
-  executar():
+  indice = 1;
+  executar();
   execut = true;
 }
 
@@ -635,5 +652,15 @@ void funcTVQ1(){
   indice = 2;
   executar();
   execut = true;
+}
+
+void funcVM(){
+  menuAtual = 0;
+  digitar = false;
+  emOp = false;
+  emSub = false;
+  indice = 0;
+
+  mostrarMenu();
 }
 
