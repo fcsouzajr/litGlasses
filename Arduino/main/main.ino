@@ -18,10 +18,10 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 #define Colunas 3 //configuração para as colunas e a largura (em pixeis);
 #define Largura 40;
 
-String fraseDigitada = ""; //indica a frase que está sendo digitada
+char fraseDigitada[33] = ""; //indica a frase que está sendo digitada
 String palavrasCorretas[3];  // Para armazenar até 3 palavras corretas
 uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas no vetor palavras corretas, 
-String fraseFinal = ""; //frase que aparece no final, que foi escrita
+char fraseFinal[33] = ""; //frase que aparece no final, que foi escrita
 int8_t indiceN = -1; //para selecionar a palavra indicada que tu quer escrever (é -1 pq posso adicionar +1 no codgo sem se preocupar)
 static bool emSelecionar = false; //Saber se está navegando entre as letras ou aa palavras indicadas
 int cont = 0; //contador para saber se está navegandoi no teclado ou nas opções de palavra
@@ -107,7 +107,7 @@ const char* subMenuComunicacao[] = {"Digitar"};
 const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
 const char* subMenuMensagem[] = {"Perigo", "Nescessidade"};
 //teclado
-const char* tecladoABC []= {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L","M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"," "};
+const char  tecladoABC[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
 //opções do submenu automação
 const char* opSala[] = {"Rele 1", "Rele 2", "TV"};
 const char* opQuarto1[] = {"Rele 1", "Rele 2", "TV"};
@@ -128,9 +128,9 @@ void setup() {
   Serial.begin(9600);
   oled.begin(&Adafruit128x64, 0x3C);
   if(!SD.begin(SD_CS)){
-    Serial.println("Erro ao inciar SD");
+    Serial.println(F("Erro ao inciar SD"));
   }else{
-    Serial.println("SD PRONTO!");
+    Serial.println(F("SD PRONTO!"));
   }
   oled.setFont(System5x7); //definindo a fonte
   oled.clear(); //limpando o display
@@ -221,7 +221,7 @@ void bot1() {
     }else if (Contador == 3) {
       if(digitar){ //se estiver no teclado digitando, e estiver selecionando uma palavra indicada
         if(emSelecionar){
-          fraseFinal += " ";
+          
           fraseFinal += palavrasCorretas[indiceN];
           fraseDigitada = "";
           mostrarTeclado();
@@ -421,7 +421,7 @@ void mostrarTeclado(){
 
   indice %= sizeof(tecladoABC) / sizeof(tecladoABC[0]);
 
-  for(uint8_t i = 0; i < sizeof(tecladoABC) / sizeof(tecladoABC[0]); i++){
+  for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])) - 1); i++){
     uint8_t x = (i % 16) * 8;
     uint8_t y = (i / 16) + 1;
 
@@ -537,7 +537,9 @@ void executarOp(){
 }
 
 void executarFrase(){
-  fraseDigitada += tecladoABC[indice];
+  uint8_t len = strlen(fraseDigitada);
+  fraseDigitada[len] = tecladoABC[indice];
+  fraseDigitada[len + 1] = '\0';
 
   String nomeArquivo = String(fraseDigitada[0]) + ".txt";
 
