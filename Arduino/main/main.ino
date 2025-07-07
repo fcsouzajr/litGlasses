@@ -2,11 +2,15 @@
 #include <SSD1306AsciiAvrI2C.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
-#include <SD.h>
+#define SDFAT_FILE_TYPE 1 //modo light
+#define USE_MULTI_BLOCKIO 0
+#include <SdFat.h>
 
 #define SD_CS 8
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
+
+SdFat SD;
 
 SoftwareSerial Tx(10, 11); //Criando objeto para a biblioteca e se comunicar com o modulo bluetooth
 SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comunicar com o celular
@@ -18,10 +22,10 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 #define Colunas 3 //configuração para as colunas e a largura (em pixeis);
 #define Largura 40;
 
-char fraseDigitada[33] = ""; //indica a frase que está sendo digitada
-String palavrasCorretas[3];  // Para armazenar até 3 palavras corretas
-uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas no vetor palavras corretas, 
-char fraseFinal[33] = ""; //frase que aparece no final, que foi escrita
+char fraseDigitada[31] = ""; //indica a frase que está sendo digitada
+char palavrasCorretas[3][31];  // Para armazenar até 3 palavras corretas
+uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas na matriz palavras corretas, 
+char fraseFinal[50] = ""; //frase que aparece no final, que foi escrita
 int8_t indiceN = -1; //para selecionar a palavra indicada que tu quer escrever (é -1 pq posso adicionar +1 no codgo sem se preocupar)
 static bool emSelecionar = false; //Saber se está navegando entre as letras ou aa palavras indicadas
 int cont = 0; //contador para saber se está navegandoi no teclado ou nas opções de palavra
@@ -107,7 +111,7 @@ const char* subMenuComunicacao[] = {"Digitar"};
 const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
 const char* subMenuMensagem[] = {"Perigo", "Nescessidade"};
 //teclado
-const char  tecladoABC[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
+const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
 //opções do submenu automação
 const char* opSala[] = {"Rele 1", "Rele 2", "TV"};
 const char* opQuarto1[] = {"Rele 1", "Rele 2", "TV"};
@@ -127,7 +131,7 @@ void setup() {
   Cell.begin(9600);
   Serial.begin(9600);
   oled.begin(&Adafruit128x64, 0x3C);
-  if(!SD.begin(SD_CS)){
+  if(!SD.begin(SD_CS, SD_SCK_MHZ(4))){
     Serial.println(F("Erro ao inciar SD"));
   }else{
     Serial.println(F("SD PRONTO!"));
@@ -222,8 +226,8 @@ void bot1() {
       if(digitar){ //se estiver no teclado digitando, e estiver selecionando uma palavra indicada
         if(emSelecionar){
           
-          fraseFinal += palavrasCorretas[indiceN];
-          fraseDigitada = "";
+          snprintf(fraseFinal, sizeof(fraseFinal), "%s %s", fraseFinal, palavrasCorretas[indiceN]);
+          fraseDigitada[0] = '\0';
           mostrarTeclado();
         }else{
           executar();
@@ -276,10 +280,10 @@ void bot2() {
         emSelecionar = false;
         oled.clear();
         oled.print(fraseFinal);
-        Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
+        //Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
         delay(3000);
-        fraseDigitada = "";
-        fraseFinal = "";
+        fraseDigitada[0] = "\0";
+        fraseFinal[0] = "\0";
         indice = 0;
         mostrarMenu();
       }else{
@@ -421,7 +425,7 @@ void mostrarTeclado(){
 
   indice %= sizeof(tecladoABC) / sizeof(tecladoABC[0]);
 
-  for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])) - 1); i++){
+  for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])); i++){
     uint8_t x = (i % 16) * 8;
     uint8_t y = (i / 16) + 1;
 
@@ -541,21 +545,35 @@ void executarFrase(){
   fraseDigitada[len] = tecladoABC[indice];
   fraseDigitada[len + 1] = '\0';
 
-  String nomeArquivo = String(fraseDigitada[0]) + ".txt";
+  char nomeArquivo[8];
+
+  snprintf(nomeArquivo, sizeof(nomeArquivo), "%c.txt", fraseDigitada[0]);
 
   File arquivo = SD.open(nomeArquivo);
   if(!arquivo){
-    Serial.println("Erro ao abrir");
+    Serial.println(F("Erro ao abrir"));
     return;
   }                                                                                                                        
 
   contador = 0;
-  String palavra;
+  char palavra[31];
 
   while(arquivo.available()){
-    palavra = arquivo.readStringUntil('\n');
-    if(palavra.startsWith(fraseDigitada)){
-      palavrasCorretas[contador] = palavra; //quando contador é 0, vai colocar na posição 0 do vetor a palavra e etc
+
+    uint8_t i = 0;
+    while(arquivo.available()){
+      char c = arquivo.read();
+      if(c == '\n' || c == '\r' || i > sizeof(palavra)){
+        break;
+      }
+      palavra[i] = c;
+      i++;
+    }
+
+    palavra[i] = '\0';
+
+    if(strncmp(palavra, fraseDigitada, strlen(fraseDigitada)) == 0){
+      strncpy(palavrasCorretas[contador], palavra, sizeof(palavrasCorretas[contador]));
       contador++;
     }
 
@@ -563,6 +581,7 @@ void executarFrase(){
       break;
     }
   }
+
   arquivo.close();
   mostrarTeclado();
 }
