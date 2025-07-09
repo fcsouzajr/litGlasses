@@ -10,7 +10,7 @@ int values[2];
 
 int P, I, D, erroAnt, PID;
 
-float Kp = 10.0, Kd = 1.5, Ki = 0.01;
+float Kp = 1.0, Kd = 1.0, Ki = 0.01;
 
 uint8_t baseSpeed = 90;
 uint8_t Vd, Ve;
@@ -35,7 +35,7 @@ void setup() {
   analogWrite(PWMd, baseSpeed);
   analogWrite(PWMe, baseSpeed);
 
-  calibrar();
+  //calibrar();
 
   Serial.println("Aguardando botão no pino 2...");
 
@@ -91,7 +91,7 @@ void loop() {
   delay(10); // pequeno delay pra não lotar o serial
 }
 
-void calibrar() {
+/*void calibrar() {
   Serial.println("Iniciando calibração...");
 
   // Inicializa os min e max
@@ -130,15 +130,13 @@ void calibrar() {
     Serial.print(" Max: ");
     Serial.println(maxValue[i]);
   }
-}
+}*/
 
 void lerSensores() {
-  for (int i = 0; i < 2; i++) {
-    // Mapeia leitura entre 0 e 100 baseado na calibração
-    values[i] = map(analogRead(i), minValue[i], maxValue[i], 0, 100);
+  values[0] = constrain(analogRead(A0), 185, 820);
+  values[1] = constrain(analogRead(A1), 180, 830);
 
-    // Garantir que não passe dos limites
-    if (values[i] < 0) values[i] = 0;
-    if (values[i] > 100) values[i] = 100;
-  }
+  values[0] = map(values[0], 195, 805, 0, 100);
+  values[1] = map(values[1], 180, 820, 0, 100);
+
 }
