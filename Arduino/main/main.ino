@@ -21,7 +21,7 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 char fraseDigitada[31] = ""; //indica a frase que está sendo digitada
 char palavrasCorretas[3][31];  // Para armazenar até 3 palavras corretas
 uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas na matriz palavras corretas, 
-char fraseFinal[50] = ""; //frase que aparece no final, que foi escrita
+char fraseFinal[40] = ""; //frase que aparece no final, que foi escrita
 int8_t indiceN = -1; //para selecionar a palavra indicada que tu quer escrever (é -1 pq posso adicionar +1 no codgo sem se preocupar)
 static bool emSelecionar = false; //Saber se está navegando entre as letras ou aa palavras indicadas
 int cont = 0; //contador para saber se está navegandoi no teclado ou nas opções de palavra
