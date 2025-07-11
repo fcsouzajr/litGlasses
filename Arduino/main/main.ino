@@ -174,7 +174,7 @@ void setup() {
   }else{
     Serial.println(F("SD PRONTO!"));
   }
-  oled.setFont(font8x8); //definindo a fonte //System5x7
+  oled.setFont(System5x7); //definindo a fonte //System5x7
   oled.clear(); //limpando o display
   pinMode(led, OUTPUT);
   pinMode(Bot, INPUT_PULLUP); //definindo os pinos como de entrada com resistor interno
