@@ -1,16 +1,13 @@
+#include <SD.h>
 #include <SSD1306Ascii.h>
 #include <SSD1306AsciiAvrI2C.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
-#define SDFAT_FILE_TYPE 1 //modo light
-#define USE_MULTI_BLOCKIO 0
-#include <SdFat.h>
+
 
 #define SD_CS 8
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
-
-SdFat SD;
 
 SoftwareSerial Tx(10, 11); //Criando objeto para a biblioteca e se comunicar com o modulo bluetooth
 SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comunicar com o celular
@@ -106,13 +103,32 @@ Comando cmds[] = {
 
 
 //textos dos menus
-const char* menuPrincipal[] = {"Comunicacao", "Automacao", "Mensagem"};
-const char* subMenuComunicacao[] = {"Digitar"};
-const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
-const char* subMenuMensagem[] = {"Perigo", "Nescessidade"};
+const char menu_P_Com[] PROGMEM = "Comunicacao";
+const char menu_P_Auto[] PROGMEM = "Automacao";
+const char menu_P_Men[] PROGMEM = "Mensagem";
+
+const char* const menuPrincipal[] = {menu_P_Com, menu_P_Auto, menu_P_Men};
+
+const char SubAuto_Sl[] PROGMEM = "Sala";
+const char SubAuto_Q1[] PROGMEM = "Quarto1";
+const char SubAuto_Q2[] PROGMEM = "Quarto2";
+const char SubAuto_Coz[] PROGMEM = "Cozinha";
+
+const char* const subMenuAutomacao[] = {SubAuto_Sl, SubAuto_Q1, SubAuto_Q2, SubAuto_Coz};
+
+const char SubMen_Perig[] PROGMEM = "Perigo";
+const char SubMen_Nesce[] PROGMEM = "Nescessidade";
+
+const char* const subMenuMensagem[] PROGMEM = {SubMen_Perig, SubMen_Nesce}; 
 //teclado
 const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
 //opções do submenu automação
+const char opSala_Rl1[] PROGMEM = "Rele 1";
+const char opSala_Rl2[] PROGMEM = "Rele 2";
+const char opSala_Tv[] PROGMEM = "TV";
+
+const char* const opSala[] = {opSala_Rl1, opSala_Rl2, opSala_Tv};
+
 const char* opSala[] = {"Rele 1", "Rele 2", "TV"};
 const char* opQuarto1[] = {"Rele 1", "Rele 2", "TV"};
 const char* opQuarto2[] = {"Rele 1", "Rele 2", "TV"};
@@ -131,8 +147,9 @@ void setup() {
   Cell.begin(9600);
   Serial.begin(9600);
   oled.begin(&Adafruit128x64, 0x3C);
-  if(!SD.begin(SD_CS, SD_SCK_MHZ(4))){
+  if(!SD.begin(SD_CS)){
     Serial.println(F("Erro ao inciar SD"));
+    delay(2000);
   }else{
     Serial.println(F("SD PRONTO!"));
   }
@@ -183,8 +200,7 @@ void loop() {
   Serial.print("emOp: "); Serial.println(emOp);
   Serial.print("digitar: "); Serial.println(digitar);
   Serial.print("emSelecionar: "); Serial.println(emSelecionar);
-  Serial.println("----------------------");
-  Serial.println(fraseFinal);*/
+  Serial.println("----------------------");*/
   delay(50);
 }
 
@@ -282,8 +298,8 @@ void bot2() {
         oled.print(fraseFinal);
         //Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
         delay(3000);
-        fraseDigitada[0] = "\0";
-        fraseFinal[0] = "\0";
+        memset(fraseDigitada, '\0', sizeof(fraseDigitada));
+        memset(fraseFinal, '\0', sizeof(fraseFinal));
         indice = 0;
         mostrarMenu();
       }else{
@@ -553,7 +569,7 @@ void executarFrase(){
   if(!arquivo){
     Serial.println(F("Erro ao abrir"));
     return;
-  }                                                                                                                        
+  }
 
   contador = 0;
   char palavra[31];

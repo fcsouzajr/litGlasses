@@ -36,15 +36,6 @@ void setup() {
   analogWrite(PWMe, baseSpeed);
 
   //calibrar();
-
-  Serial.println("Aguardando botão no pino 2...");
-
-  while (true) {
-    if (digitalRead(2) == LOW) {
-      Serial.println("Iniciando controle");
-      break;
-    }
-  }
 }
 
 void loop() {
