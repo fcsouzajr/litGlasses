@@ -437,6 +437,7 @@ void mostrarOp(){
       opMenu = opQuarto2;
       tamanho = opQ2_Total;
       Cell.println("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
+    break;
     case 4:
       oled.setCursor(0, 0);
       oled.print(F("Cozinha-Auto"));
@@ -611,9 +612,11 @@ void executarOp(){
   oled.print(dados[indice].mensagem);
   Tx.print(dados[indice].comandoSerial);
   dados[indice].state = !dados[indice].state;
-  Cell.println(String(dados[indice].mensagem) + (dados[indice].state ? "ON" : "OFF"));
+  snprintf(buffer, sizeof(buffer), "%s%s", dados[indice].mensagem, dados[indice].state ? "ON" : "OFF");
+  Cell.print(buffer);
   delay(2000);
   oled.clear();
+  memset(buffer, '\0', sizeof(buffer));
   delay(100);
   mostrarOp();
 }
