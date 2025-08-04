@@ -10,14 +10,14 @@ int values[2];
 
 int P, I, D, erroAnt, PID;
 
-float Kp = 1.0, Kd = 1.0, Ki = 0.01;
+float Kp = 3.0, Kd = 1.5, Ki = 0.01;
 
 uint8_t baseSpeed = 90;
 uint8_t Vd, Ve;
 
 void setup() {
   Serial.begin(9600);
-
+  
   Serial.println("Iniciando");
 
   for (uint8_t x = 0; x < 4; x++) {
@@ -28,6 +28,7 @@ void setup() {
 
   pinMode(PWMd, OUTPUT);
   pinMode(PWMe, OUTPUT);
+
   pinMode(2, INPUT_PULLUP);
 
   Serial.println("Pinos OK");
@@ -40,8 +41,8 @@ void setup() {
 
 void loop() {
   // Configura os motores para frente (ajusta conforme teu motor)
-  digitalWrite(Motor[0], LOW);
-  digitalWrite(Motor[1], HIGH);
+  digitalWrite(Motor[0], HIGH);
+  digitalWrite(Motor[1], LOW);
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 
