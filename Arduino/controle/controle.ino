@@ -8,7 +8,7 @@ int minValue[2];
 
 int values[2];
 
-int P, I, D, erroAnt, PID;
+float P, I, D, erroAnt, PID;
 
 float Kp = 1.0, Kd = 1.0, Ki = 0.01;
 
@@ -35,7 +35,6 @@ void setup() {
   analogWrite(PWMd, baseSpeed);
   analogWrite(PWMe, baseSpeed);
 
-  //calibrar();
 }
 
 void loop() {
@@ -45,9 +44,7 @@ void loop() {
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 
-  lerSensores();
-
-  int erro = values[0] - values[1];
+  float erro = (1.5*analogRead(A0) + 0.5*analogRead(A1)) - (1.5*analogRead(A3) + 0.5*analogRead(A2));
 
   P = erro;
   I = I + erro;
@@ -57,7 +54,7 @@ void loop() {
 
   PID = (Kp * P) + (Ki * I) + (Kd * D);
 
-  // Limita PID para não dar pau no motor
+  // Limita PID
   if (PID > 255) PID = 255;
   else if (PID < -255) PID = -255;
 
@@ -80,54 +77,4 @@ void loop() {
   Serial.println(values[1]);
 
   delay(10); // pequeno delay pra não lotar o serial
-}
-
-/*void calibrar() {
-  Serial.println("Iniciando calibração...");
-
-  // Inicializa os min e max
-  for (uint8_t i = 0; i < 2; i++) {
-    minValue[i] = 1023;
-    maxValue[i] = 0;
-  }
-
-  // Liga motores em sentido contrário pra passar na linha (ajusta conforme teu motor)
-  digitalWrite(Motor[0], LOW);
-  digitalWrite(Motor[1], HIGH);
-  digitalWrite(Motor[2], LOW);
-  digitalWrite(Motor[3], HIGH);
-
-  // Lê várias vezes para pegar min e max reais
-  for (int x = 0; x < 10000; x++) {
-    for (uint8_t i = 0; i < 2; i++) {
-      int leitura = analogRead(i);
-      if (leitura < minValue[i]) minValue[i] = leitura;
-      if (leitura > maxValue[i]) maxValue[i] = leitura;
-    }
-    delay(1);
-  }
-
-  // Desliga motores
-  for (uint8_t x = 0; x < 4; x++) {
-    digitalWrite(Motor[x], LOW);
-  }
-
-  Serial.println("Calibração feita:");
-  for (uint8_t i = 0; i < 2; i++) {
-    Serial.print("Sensor ");
-    Serial.print(i);
-    Serial.print(" Min: ");
-    Serial.print(minValue[i]);
-    Serial.print(" Max: ");
-    Serial.println(maxValue[i]);
-  }
-}*/
-
-void lerSensores() {
-  values[0] = constrain(analogRead(A0), 185, 820);
-  values[1] = constrain(analogRead(A1), 180, 830);
-
-  values[0] = map(values[0], 195, 805, 0, 100);
-  values[1] = map(values[1], 180, 820, 0, 100);
-
 }
