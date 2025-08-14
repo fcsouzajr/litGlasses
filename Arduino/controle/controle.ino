@@ -1,13 +1,19 @@
-uint8_t Motor[4] = {4, 5, 6, 7};
+#include <Ultrasonic.h>
 
-#define PWMd 10
-#define PWMe 9
+Ultrasonic Ultra_Drt(26, 27);
+Ultrasonic Ultra_Esq(28, 29);
+Ultrasonic Ultra_Mei(30, 31);
+
+uint8_t Motor[4] = {22, 23, 24, 25};
+
+#define PWMd 2
+#define PWMe 3
 
 float P, I, D, erroAnt, PID;
 
-float Kp = 3.0, Kd = 1.5, Ki = 0.01;
+float Kp = 5.0, Kd = 1.5, Ki = 0.01;
 
-uint8_t baseSpeed = 90;
+uint8_t baseSpeed = 70;
 uint8_t Vd, Ve;
 
 void setup() {
@@ -40,7 +46,7 @@ void loop() {
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 
-  float erro = (1.5*analogRead(A0) + 0.5*analogRead(A1)) - (1.5*analogRead(A3) + 0.5*analogRead(A2));
+  float erro = (1.1*analogRead(A0) + 0.5*analogRead(A1)) - (1.1*(analogRead(A3)+60) + 0.5*analogRead(A2));
 
   P = erro;
   I = I + erro;
@@ -51,8 +57,8 @@ void loop() {
   PID = (Kp * P) + (Ki * I) + (Kd * D);
 
   // Limita PID
-  if (PID > 255) PID = 255;
-  else if (PID < -255) PID = -255;
+  if (PID > 30) PID = 30;
+  else if (PID < -30) PID = -30;
 
   Ve = constrain(baseSpeed - (int)PID, 0, 255);
   Vd = constrain(baseSpeed + (int)PID, 0, 255);
@@ -68,9 +74,13 @@ void loop() {
   Serial.print(" | Ve: ");
   Serial.print(Ve);
   Serial.print(" | S0: ");
-  Serial.print(values[0]);
+  Serial.print(analogRead(A0));
   Serial.print(" | S1: ");
-  Serial.println(values[1]);
+  Serial.print(analogRead(A1));
+  Serial.print(" | S2: ");
+  Serial.print(analogRead(A2));
+  Serial.print(" | S3: ");
+  Serial.println(analogRead(A3));
 
   delay(10); // pequeno delay pra não lotar o serial
 }
