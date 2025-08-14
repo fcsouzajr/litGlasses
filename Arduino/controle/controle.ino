@@ -3,11 +3,6 @@ uint8_t Motor[4] = {4, 5, 6, 7};
 #define PWMd 10
 #define PWMe 9
 
-int maxValue[2];
-int minValue[2];
-
-int values[2];
-
 float P, I, D, erroAnt, PID;
 
 float Kp = 1.0, Kd = 1.0, Ki = 0.01;
@@ -58,8 +53,8 @@ void loop() {
   if (PID > 255) PID = 255;
   else if (PID < -255) PID = -255;
 
-  Ve = constrain(baseSpeed - PID, 0, 255);
-  Vd = constrain(baseSpeed + PID, 0, 255);
+  Ve = constrain(baseSpeed - (int)PID, 0, 255);
+  Vd = constrain(baseSpeed + (int)PID, 0, 255);
 
   analogWrite(PWMd, Vd);
   analogWrite(PWMe, Ve);
