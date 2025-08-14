@@ -4,7 +4,7 @@
 #include <SoftwareSerial.h>
 #include <SPI.h>
 
-#define SD_CS 8
+#define SD_CS 10
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
 
@@ -170,7 +170,6 @@ void setup() {
   oled.begin(&Adafruit128x64, 0x3C);
   if(!SD.begin(SD_CS)){
     Serial.println(F("Erro ao inciar SD"));
-    delay(2000);
   }else{
     Serial.println(F("SD PRONTO!"));
   }
