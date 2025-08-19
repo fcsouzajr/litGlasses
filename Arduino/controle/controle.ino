@@ -14,9 +14,9 @@ uint8_t Motor[4] = {22, 23, 24, 25};
 
 float P, I, D, erroAnt, PID;
 
-float Kp = 10.0, Kd = 2.0, Ki = 0.01;
+float Kp = 45.0, Kd = 10.0, Ki = 1.0;
 
-uint8_t baseSpeed = 70;
+uint8_t baseSpeed = 50;
 uint8_t Vd, Ve;
 
 
@@ -54,7 +54,7 @@ void loop() {
   dist_Esq = Ultra_Esq.read();
   dist_Mei = Ultra_Mei.read();
 
-  float erro = (1.1*analogRead(A0) + 0.5*analogRead(A1)) - (1.1*(analogRead(A3)+60) + 0.5*analogRead(A2));
+  float erro = (1.5*analogRead(A0) + 1*analogRead(A1)) - (1.5*analogRead(A3) + 1*analogRead(A2));
 
   P = erro;
   I = I + erro;
@@ -65,8 +65,8 @@ void loop() {
   PID = (Kp * P) + (Ki * I) + (Kd * D);
 
   // Limita PID
-  if (PID > 30) PID = 30;
-  else if (PID < -30) PID = -30;
+  if (PID > 20) PID = 20;
+  else if (PID < -20) PID = -20;
 
   Ve = constrain(baseSpeed - (int)PID, 0, 255);
   Vd = constrain(baseSpeed + (int)PID, 0, 255);
@@ -76,6 +76,8 @@ void loop() {
 
   Serial.print("Erro: ");
   Serial.print(erro);
+  Serial.print("PID");
+  Serial.print(PID);
   Serial.print(" | Vd: ");
   Serial.print(Vd);
   Serial.print(" | Ve: ");
