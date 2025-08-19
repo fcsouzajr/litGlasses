@@ -4,17 +4,21 @@ Ultrasonic Ultra_Drt(26, 27);
 Ultrasonic Ultra_Esq(28, 29);
 Ultrasonic Ultra_Mei(30, 31);
 
+int dist_Drt, dist_Esq, dist_Mei;
+
 uint8_t Motor[4] = {22, 23, 24, 25};
 
 #define PWMd 2
 #define PWMe 3
+#define read_pin_IR 4
 
 float P, I, D, erroAnt, PID;
 
-float Kp = 5.0, Kd = 1.5, Ki = 0.01;
+float Kp = 10.0, Kd = 2.0, Ki = 0.01;
 
 uint8_t baseSpeed = 70;
 uint8_t Vd, Ve;
+
 
 void setup() {
   Serial.begin(9600);
@@ -27,6 +31,7 @@ void setup() {
 
   Serial.println("Motores ok");
 
+  pinMode(read_pin_IR, INPUT);
   pinMode(PWMd, OUTPUT);
   pinMode(PWMe, OUTPUT);
 
@@ -40,11 +45,14 @@ void setup() {
 }
 
 void loop() {
-  // Configura os motores para frente (ajusta conforme teu motor)
   digitalWrite(Motor[0], HIGH);
   digitalWrite(Motor[1], LOW);
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
+
+  dist_Drt = Ultra_Drt.read();
+  dist_Esq = Ultra_Esq.read();
+  dist_Mei = Ultra_Mei.read();
 
   float erro = (1.1*analogRead(A0) + 0.5*analogRead(A1)) - (1.1*(analogRead(A3)+60) + 0.5*analogRead(A2));
 
@@ -66,7 +74,6 @@ void loop() {
   analogWrite(PWMd, Vd);
   analogWrite(PWMe, Ve);
 
-  // Debug no serial
   Serial.print("Erro: ");
   Serial.print(erro);
   Serial.print(" | Vd: ");
@@ -82,5 +89,5 @@ void loop() {
   Serial.print(" | S3: ");
   Serial.println(analogRead(A3));
 
-  delay(10); // pequeno delay pra não lotar o serial
+  delay(10); 
 }
