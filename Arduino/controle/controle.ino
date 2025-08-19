@@ -1,64 +1,60 @@
-uint8_t Motor[4] = {4, 5, 6, 7};
+#include <Ultrasonic.h>
 
-#define PWMd 10
-#define PWMe 9
+Ultrasonic Ultra_Drt(26, 27);
+Ultrasonic Ultra_Esq(28, 29);
+Ultrasonic Ultra_Mei(30, 31);
 
-int maxValue[2];
-int minValue[2];
-int maxValueConta[2];
-int minValueConta[2];
-int NumMin[2], NumMax[2]; 
-int values[2];
+int dist_Drt, dist_Esq, dist_Mei;
 
-int P, I, D, erroAnt, PID;
+uint8_t Motor[4] = {22, 23, 24, 25};
 
-float Kp = 10, Kd = 1.5, Ki = 0.01;
+#define PWMd 2
+#define PWMe 3
+#define read_pin_IR 4
 
-uint8_t baseSpeed = 90;
+float P, I, D, erroAnt, PID;
+
+float Kp = 10.0, Kd = 2.0, Ki = 0.01;
+
+uint8_t baseSpeed = 70;
 uint8_t Vd, Ve;
 
 
 void setup() {
-
   Serial.begin(9600);
+  
+  Serial.println("Iniciando");
 
-  Serial.println("Indo");
-
-  for(uint8_t x = 0; x < 4; x++){
+  for (uint8_t x = 0; x < 4; x++) {
     pinMode(Motor[x], OUTPUT);
   }
 
-  Serial.println("motores ok");
+  Serial.println("Motores ok");
 
+  pinMode(read_pin_IR, INPUT);
   pinMode(PWMd, OUTPUT);
   pinMode(PWMe, OUTPUT);
+
   pinMode(2, INPUT_PULLUP);
 
   Serial.println("Pinos OK");
-  
+
   analogWrite(PWMd, baseSpeed);
   analogWrite(PWMe, baseSpeed);
-
-  calibrar();
-
-  while(true){
-    if(digitalRead(2) == LOW){
-      break;
-    }
-  }
 
 }
 
 void loop() {
-
-  digitalWrite(Motor[0], LOW);
-  digitalWrite(Motor[1], HIGH);
+  digitalWrite(Motor[0], HIGH);
+  digitalWrite(Motor[1], LOW);
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 
-  ler();
+  dist_Drt = Ultra_Drt.read();
+  dist_Esq = Ultra_Esq.read();
+  dist_Mei = Ultra_Mei.read();
 
-  int erro = values[0] - values[1];
+  float erro = (1.1*analogRead(A0) + 0.5*analogRead(A1)) - (1.1*(analogRead(A3)+60) + 0.5*analogRead(A2));
 
   P = erro;
   I = I + erro;
@@ -68,87 +64,30 @@ void loop() {
 
   PID = (Kp * P) + (Ki * I) + (Kd * D);
 
+  // Limita PID
+  if (PID > 30) PID = 30;
+  else if (PID < -30) PID = -30;
 
-  Ve = baseSpeed - PID;
-  Vd = baseSpeed + PID;
+  Ve = constrain(baseSpeed - (int)PID, 0, 255);
+  Vd = constrain(baseSpeed + (int)PID, 0, 255);
 
   analogWrite(PWMd, Vd);
   analogWrite(PWMe, Ve);
 
-  //Serial.print(erro);
-  /*Serial.print(" ");
+  Serial.print("Erro: ");
+  Serial.print(erro);
+  Serial.print(" | Vd: ");
   Serial.print(Vd);
-  Serial.print(" ");
-  Serial.print(Ve);*/
-  //Serial.print(" ");
+  Serial.print(" | Ve: ");
+  Serial.print(Ve);
+  Serial.print(" | S0: ");
   Serial.print(analogRead(A0));
-  Serial.print(" ");
-  Serial.print(minValue[0]);
-  Serial.print(" ");
+  Serial.print(" | S1: ");
   Serial.print(analogRead(A1));
-  Serial.print(" ");
-  Serial.println(minValue[1]);
-  
+  Serial.print(" | S2: ");
+  Serial.print(analogRead(A2));
+  Serial.print(" | S3: ");
+  Serial.println(analogRead(A3));
 
-}
-
-void calibrar(){
-
-  Serial.println("Iniciando calibração");
-
-  for(uint8_t x = 0; x < 2; x++){
-    minValueConta[x] = analogRead(x);
-    maxValueConta[x] = analogRead(x);
-  }
-  
-  Serial.println("p2");
-
-  digitalWrite(Motor[0], LOW);
-  digitalWrite(Motor[1], HIGH);
-  digitalWrite(Motor[2], LOW);
-  digitalWrite(Motor[3], HIGH);
-
-  for(int x = 0; x < 10000; x++){
-    for(uint8_t i = 0; i < 2; i++){
-      
-      int leitura = analogRead(i);
-      
-      if(leitura < minValueConta[i]){
-        minValueConta[i] = leitura;
-        minValue[i] += leitura;
-        NumMin[i]++;
-      }
-
-      if(leitura > maxValueConta[i]){
-        maxValueConta[i] = leitura;
-        maxValue[i] += leitura;
-        NumMax[i]++;
-      }
-    }
-    delay(1);
-  }
-  
-  Serial.println("P3");
-
-  for(uint8_t x = 0; x < 2; x++){
-    minValue[x] = minValue[x] / NumMin[x];
-    maxValue[x] = maxValue[x] / NumMax[x];
-  }
-
-  digitalWrite(Motor[0], LOW);
-  digitalWrite(Motor[1], LOW);
-  digitalWrite(Motor[2], LOW);
-  digitalWrite(Motor[3], LOW);
-
-  Serial.println("Calibrado");
-}
-
-
-
-void ler(){
-  
-  for(int i = 0; i < 2; i++){
-    values[i] = map(analogRead(i), minValue[i], maxValue[i], 0, 100);
-    //values[i] = map(analogRead(i), 0, 1023, 0, 100);
-  } 
+  delay(10); 
 }

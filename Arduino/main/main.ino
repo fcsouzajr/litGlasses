@@ -1,10 +1,10 @@
+#include <SD.h>
 #include <SSD1306Ascii.h>
 #include <SSD1306AsciiAvrI2C.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
-#include <SD.h>
 
-#define SD_CS 8
+#define SD_CS 10
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
 
@@ -18,10 +18,10 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 #define Colunas 3 //configuração para as colunas e a largura (em pixeis);
 #define Largura 40;
 
-char fraseDigitada[33] = ""; //indica a frase que está sendo digitada
-String palavrasCorretas[3];  // Para armazenar até 3 palavras corretas
-uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas no vetor palavras corretas, 
-char fraseFinal[33] = ""; //frase que aparece no final, que foi escrita
+char fraseDigitada[31] = ""; //indica a frase que está sendo digitada
+char palavrasCorretas[3][31];  // Para armazenar até 3 palavras corretas
+uint8_t contador = 0; //contador para saber quantas palavras foram adicionadas na matriz palavras corretas, 
+char fraseFinal[40] = ""; //frase que aparece no final, que foi escrita
 int8_t indiceN = -1; //para selecionar a palavra indicada que tu quer escrever (é -1 pq posso adicionar +1 no codgo sem se preocupar)
 static bool emSelecionar = false; //Saber se está navegando entre as letras ou aa palavras indicadas
 int cont = 0; //contador para saber se está navegandoi no teclado ou nas opções de palavra
@@ -43,27 +43,27 @@ struct opData {
 };
 
 opData Sala[] = {
-  {"RELE1", "0", false},
-  {"RELE2", "1", false},
+  {"RL1", "0", false},
+  {"RL2", "1", false},
   {"TV", "2", false}
 };
 
 opData Quarto1[] = {
-  {"RELE1", "3", false},
-  {"RELE2", "4", false},
+  {"RL1", "3", false},
+  {"RL2", "4", false},
   {"TV", "5", false}
 };
 
 opData Quarto2[] = {
-  {"RELE1", "6", false},
-  {"RELE2", "7", false},
+  {"RL1", "6", false},
+  {"RL2", "7", false},
   {"TV", "8", false}
 };
 
 opData Cozinha[] = {
-  {"RELE1", "9", false},
-  {"RELE2", "10", false},
-  {"Eletro", "11", false}
+  {"RL1", "9", false},
+  {"RL2", "10", false},
+  {"Eltr", "11", false}
 };
 
 typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
@@ -99,20 +99,61 @@ Comando cmds[] = {
   {"VM", funcVM}
 };
 
+#define Menu_Total 3
+#define SubAuto_Total 4
+#define SubMen_Total 2
+#define opSala_Total 3
+#define opQ1_Total 3
+#define opQ2_Total 3
+#define opCz_Total 3
 
 
 //textos dos menus
-const char* menuPrincipal[] = {"Comunicacao", "Automacao", "Mensagem"};
-const char* subMenuComunicacao[] = {"Digitar"};
-const char* subMenuAutomacao[] = {"Sala", "Quarto1", "Quarto2", "Cozinha"};
-const char* subMenuMensagem[] = {"Perigo", "Nescessidade"};
+const char menu_P_Com[] PROGMEM = "Comunicacao";
+const char menu_P_Auto[] PROGMEM = "Automacao";
+const char menu_P_Men[] PROGMEM = "Mensagem";
+
+const char* const menuPrincipal[] PROGMEM = {menu_P_Com, menu_P_Auto, menu_P_Men};
+
+const char SubAuto_Sl[] PROGMEM = "Sala";
+const char SubAuto_Q1[] PROGMEM = "Quarto1";
+const char SubAuto_Q2[] PROGMEM = "Quarto2";
+const char SubAuto_Coz[] PROGMEM = "Cozinha";
+
+const char* const subMenuAutomacao[] PROGMEM = {SubAuto_Sl, SubAuto_Q1, SubAuto_Q2, SubAuto_Coz};
+
+const char SubMen_Perig[] PROGMEM = "Perigo";
+const char SubMen_Nesce[] PROGMEM = "Nescessidade";
+
+const char* const subMenuMensagem[] PROGMEM = {SubMen_Perig, SubMen_Nesce}; 
 //teclado
-const char  tecladoABC[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
+const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
 //opções do submenu automação
-const char* opSala[] = {"Rele 1", "Rele 2", "TV"};
-const char* opQuarto1[] = {"Rele 1", "Rele 2", "TV"};
-const char* opQuarto2[] = {"Rele 1", "Rele 2", "TV"};
-const char* opCozinha[] = {"Rele 1", "Rele 2", "Eletro"};
+const char opSala_Rl1[] PROGMEM = "Rele 1";
+const char opSala_Rl2[] PROGMEM = "Rele 2";
+const char opSala_Tv[] PROGMEM = "TV";
+
+const char* const opSala[] PROGMEM = {opSala_Rl1, opSala_Rl2, opSala_Tv};
+
+const char opQ1_Rl1[] PROGMEM = "Rele 1";
+const char opQ1_Rl2[] PROGMEM = "Rele 2";
+const char opQ1_Tv[] PROGMEM = "TV";
+
+const char* const opQuarto1[] PROGMEM = {opQ1_Rl1, opQ1_Rl2, opQ1_Tv};
+
+const char opQ2_Rl1[] PROGMEM = "Rele 1";
+const char opQ2_Rl2[] PROGMEM = "Rele 2";
+const char opQ2_Tv[] PROGMEM = "TV";
+
+const char* const opQuarto2[] PROGMEM = {opQ2_Rl1, opQ2_Rl2, opQ2_Tv};
+
+const char opCz_Rl1[] PROGMEM = "Rele 1";
+const char opCz_Rl2[] PROGMEM = "Rele 2";
+const char opCz_Elt[] PROGMEM = "Eletro";
+
+const char* const opCozinha[] PROGMEM = {opCz_Rl1, opCz_Rl2, opCz_Elt};
+
+char buffer[15];
 
 // Variáveis para controle de menu
 uint8_t indice = 0;
@@ -132,7 +173,7 @@ void setup() {
   }else{
     Serial.println(F("SD PRONTO!"));
   }
-  oled.setFont(System5x7); //definindo a fonte
+  oled.setFont(System5x7); //definindo a fonte //System5x7
   oled.clear(); //limpando o display
   pinMode(led, OUTPUT);
   pinMode(Bot, INPUT_PULLUP); //definindo os pinos como de entrada com resistor interno
@@ -179,9 +220,8 @@ void loop() {
   Serial.print("emOp: "); Serial.println(emOp);
   Serial.print("digitar: "); Serial.println(digitar);
   Serial.print("emSelecionar: "); Serial.println(emSelecionar);
-  Serial.println("----------------------");
-  Serial.println(fraseFinal);*/
-  delay(50);
+  Serial.println("----------------------");*/
+  delay(100);
 }
 
 void bot1() {
@@ -222,8 +262,8 @@ void bot1() {
       if(digitar){ //se estiver no teclado digitando, e estiver selecionando uma palavra indicada
         if(emSelecionar){
           
-          fraseFinal += palavrasCorretas[indiceN];
-          fraseDigitada = "";
+          snprintf(fraseFinal, sizeof(fraseFinal), "%s %s", fraseFinal, palavrasCorretas[indiceN]);
+          memset(fraseDigitada, '\0', sizeof(fraseDigitada));
           mostrarTeclado();
         }else{
           executar();
@@ -276,10 +316,10 @@ void bot2() {
         emSelecionar = false;
         oled.clear();
         oled.print(fraseFinal);
-        Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
+        //Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
         delay(3000);
-        fraseDigitada = "";
-        fraseFinal = "";
+        memset(fraseDigitada, '\0', sizeof(fraseDigitada));
+        memset(fraseFinal, '\0', sizeof(fraseFinal));
         indice = 0;
         mostrarMenu();
       }else{
@@ -314,28 +354,44 @@ void mostrarMenu() {
   oled.setCursor(0, 0);
   oled.print(F("Menu"));
 
-  indice %= (sizeof(menuPrincipal) / sizeof(menuPrincipal[0]));
+  indice %= 3;
 
-  for(uint8_t i = 0; i < (sizeof(menuPrincipal) / sizeof(menuPrincipal[0])); i++){
+  for(uint8_t i = 0; i < 3; i++){
+
+    Serial.println("jo");
+
+     strcpy_P(buffer, (char*)pgm_read_word(&(menuPrincipal[i])));
+
     uint8_t y = i + 1;
-    if(i == indice){
+    if (i == indice) {
       oled.setInvertMode(true);
-    }else{
+    } else {
       oled.setInvertMode(false);
     }
     oled.setCursor(0, y);
-    oled.print(menuPrincipal[i]);
+    oled.print(buffer);
+    Serial.println(buffer);
+
   }
+
+  memset(buffer, '\0', sizeof(buffer));
+
+  delay(100);
+
+  Serial.println("ok");
 }
 
 void mostrarSubMenu(){
   oled.clear();
 
-  indice %= sizeof(subMenuAutomacao) / sizeof(subMenuAutomacao[0]);
+  indice %= SubAuto_Total;
 
-  for(uint8_t i = 0; i < sizeof(subMenuAutomacao) / sizeof(subMenuAutomacao[0]); i++){
+  for(uint8_t i = 0; i < SubAuto_Total; i++){
+
     uint8_t x = (i % Colunas) * Largura;
     uint8_t y = (i / Colunas) + 1;
+
+    strcpy_P(buffer, (char*)pgm_read_word(&(subMenuAutomacao[i])));
 
     if(i == indice){
       oled.setInvertMode(true);
@@ -343,8 +399,13 @@ void mostrarSubMenu(){
       oled.setInvertMode(false);
     }
     oled.setCursor(x, y);
-    oled.print(subMenuAutomacao[i]);
+    oled.print(buffer);
   }
+
+  memset(buffer, '\0', sizeof(buffer));
+
+  delay(100);
+
 }
 
 void mostrarOp(){
@@ -358,28 +419,29 @@ void mostrarOp(){
     case 1:
       oled.setCursor(0, 0);
       oled.print(F("Sala-Auto"));
-      opMenu = opSala;
-      tamanho = sizeof(opSala) / sizeof(opSala[0]);
+      opMenu = opSala; //aponta em que endereço da memória (flash) está oq tu quer
+      tamanho = opSala_Total;
       Cell.println("BTAUTO S"); //envia pro aplicativo que tá na opção se sala
     break;
     case 2:
       oled.setCursor(0, 0);
       oled.print(F("Quarto1-Auto"));
       opMenu = opQuarto1;
-      tamanho = sizeof(opQuarto1) / sizeof(opQuarto1[0]);
+      tamanho = opQ1_Total;
       Cell.println("BTAUTO Q1"); //envia para o aplicativo que tá na opção de quarto 1
     break;
     case 3:
       oled.setCursor(0,0);
       oled.print(F("Quarto2-Auto"));
       opMenu = opQuarto2;
-      tamanho = sizeof(opQuarto2) / sizeof(opQuarto2[0]);
+      tamanho = opQ2_Total;
       Cell.println("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
+    break;
     case 4:
       oled.setCursor(0, 0);
       oled.print(F("Cozinha-Auto"));
       opMenu = opCozinha;
-      tamanho = sizeof(opCozinha) / sizeof(opCozinha[0]);
+      tamanho = opCz_Total;
       Cell.println(F("BTAUTO C")); //envia para o aplicativo que tá na opção da cozinha 
     break;
   }
@@ -390,14 +452,20 @@ void mostrarOp(){
     uint8_t x = (i % Colunas) * Largura;
     uint8_t y = (i / Colunas) + 1;
 
+    strcpy_P(buffer, (char*)pgm_read_word(&(opMenu[i])));
+
     if(i == indice){
       oled.setInvertMode(true);
     }else{
       oled.setInvertMode(false);
     }
     oled.setCursor(x, y);
-    oled.print(opMenu[i]); //vai imprimir a opção que tá no vetor
+    oled.print(buffer); //vai imprimir a opção que tá no vetor
   }
+
+  memset(buffer, '\0', sizeof(buffer));
+
+  delay(100);
 
 }
 
@@ -421,7 +489,7 @@ void mostrarTeclado(){
 
   indice %= sizeof(tecladoABC) / sizeof(tecladoABC[0]);
 
-  for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])) - 1); i++){
+  for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])); i++){
     uint8_t x = (i % 16) * 8;
     uint8_t y = (i / 16) + 1;
 
@@ -433,6 +501,8 @@ void mostrarTeclado(){
     oled.setCursor(x, y);
     oled.print(tecladoABC[i]);
   }
+
+  delay(100);
 }
 
 void executar(){
@@ -440,6 +510,7 @@ void executar(){
     executarOp();
   }else if(emSub){
     if(digitar){ //se digitar = true, vai executar a frase
+      delay(100);
       executarFrase();
     }else if(menuAtual == 2){
       opAtual = indice + 1; //se não, vai entrar na opção que selecinou no menu de automação
@@ -451,6 +522,7 @@ void executar(){
       opAtual = indice + 1; //entra na opção de mensagem que você selecionou
       indice = 0;
       mostrarMsg();
+      delay(100);
       mostrarSubMensagem();
     }
   }else{
@@ -460,26 +532,32 @@ void executar(){
     indice = 0;
     if(menuAtual == 1){ //se estiver em comunicão, vai mostrar o teclado
       digitar = true; 
+      delay(100);
       mostrarTeclado();
       Cell.println("BTTECLADO");
     }else if(menuAtual == 2){
+      delay(100);
       mostrarSubMenu(); //se tiver em automação vai mostrar as subopções (Quarto1 etc) de automação
       Cell.println("BTAUTOMACAO");
     }else{
+      delay(100);
       mostrarSubMensagem();
       Cell.println("BTMSG");
     }
   }
+
 }
 
 void mostrarSubMensagem(){
   oled.clear();
 
-  indice %= sizeof(subMenuMensagem) / sizeof(subMenuMensagem[0]);
+  indice %= SubMen_Total;
 
-  for(uint8_t i = 0; i < sizeof(subMenuMensagem) / sizeof(subMenuMensagem[0]); i++){
+  for(uint8_t i = 0; i < SubMen_Total; i++){
     uint8_t x = (i % Colunas) * Largura;
     uint8_t y = (i / Colunas) + 1;
+
+    strcpy_P(buffer, (char*)pgm_read_word(&(subMenuMensagem[i])));
 
     if(i == indice){
       oled.setInvertMode(true);
@@ -487,8 +565,11 @@ void mostrarSubMensagem(){
       oled.setInvertMode(false);
     }
     oled.setCursor(x, y);
-    oled.print(subMenuMensagem[i]);
+    oled.print(buffer);
   }
+
+  memset(buffer, '\0', sizeof(buffer));
+  delay(100);
 }
 
 void mostrarMsg(){
@@ -530,9 +611,12 @@ void executarOp(){
   oled.print(dados[indice].mensagem);
   Tx.print(dados[indice].comandoSerial);
   dados[indice].state = !dados[indice].state;
-  Cell.println(String(dados[indice].mensagem) + (dados[indice].state ? "ON" : "OFF"));
+  snprintf(buffer, sizeof(buffer), "%s%s", dados[indice].mensagem, dados[indice].state ? "ON" : "OFF");
+  Cell.print(buffer);
   delay(2000);
   oled.clear();
+  memset(buffer, '\0', sizeof(buffer));
+  delay(100);
   mostrarOp();
 }
 
@@ -541,21 +625,35 @@ void executarFrase(){
   fraseDigitada[len] = tecladoABC[indice];
   fraseDigitada[len + 1] = '\0';
 
-  String nomeArquivo = String(fraseDigitada[0]) + ".txt";
+  char nomeArquivo[8];
+
+  snprintf(nomeArquivo, sizeof(nomeArquivo), "%c.txt", fraseDigitada[0]);
 
   File arquivo = SD.open(nomeArquivo);
   if(!arquivo){
-    Serial.println("Erro ao abrir");
+    Serial.println(F("Erro ao abrir"));
     return;
-  }                                                                                                                        
+  }
 
   contador = 0;
-  String palavra;
+  char palavra[31];
 
   while(arquivo.available()){
-    palavra = arquivo.readStringUntil('\n');
-    if(palavra.startsWith(fraseDigitada)){
-      palavrasCorretas[contador] = palavra; //quando contador é 0, vai colocar na posição 0 do vetor a palavra e etc
+
+    uint8_t i = 0;
+    while(arquivo.available()){
+      char c = arquivo.read();
+      if(c == '\n' || c == '\r' || i > sizeof(palavra)){
+        break;
+      }
+      palavra[i] = c;
+      i++;
+    }
+
+    palavra[i] = '\0';
+
+    if(strncmp(palavra, fraseDigitada, strlen(fraseDigitada)) == 0){
+      strncpy(palavrasCorretas[contador], palavra, sizeof(palavrasCorretas[contador]));
       contador++;
     }
 
@@ -563,7 +661,9 @@ void executarFrase(){
       break;
     }
   }
+
   arquivo.close();
+  delay(100);
   mostrarTeclado();
 }
 
@@ -575,16 +675,21 @@ void navegar(int num){
   }
 
   if(emOp){
+    delay(100);
     mostrarOp();
   }else if(emSub){
     if(digitar){
+      delay(100);
       mostrarTeclado();
     }else if(menuAtual == 2){
+      delay(100);
       mostrarSubMenu();
     }else{
+      delay(100);
       mostrarSubMensagem();
     }
   }else{
+    delay(100);
     mostrarMenu();
   }
 }
@@ -595,9 +700,11 @@ void navegarSelecionar(){
     indice = 0;
     cont = 0;
     emSelecionar = false;
+    delay(100);
     mostrarTeclado();
   }else if (emSelecionar){
     indiceN++;
+    delay(100);
     mostrarTeclado();
   }
 }
