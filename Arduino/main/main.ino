@@ -497,10 +497,10 @@ void mostrarMsg(){
 
   if(opAtual == 1){
     Cell.println("Estou em perigo");
-    oled.print("Perigo");
+    oled.print(F("Perigo"));
   }else if(opAtual == 2){
     Cell.println("Nescessito");
-    oled.print("Ajuda");
+    oled.print(F("Ajuda"));
   }
   delay(500);
 }
