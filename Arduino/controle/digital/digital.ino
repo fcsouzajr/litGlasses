@@ -1,17 +1,17 @@
 #include <Ultrasonic.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
-#include <Wire.h>
 
-uint8_t IR_Pins[5] = {4, 5, 6, A2, A3}; //pinos dos sensores infravermelhos
+uint8_t IR_Pins[5] = {4, A8, A10, A5, A7}; //pinos dos sensores infravermelhos
 uint8_t Motor[4] = {22, 23, 24, 25}; //pinos dos motores (ponte H)
 uint8_t Posicao[4] = {0, 0, 0, 0}; 
 //Uma matriz para guardar onde está cada área para colocar os mortos e vivos, sendo posicao[0] o vertice inferior direito, assim por diante
+static bool D4_, A0_, A1_, A2_, A3_;
+static bool state_motor;
 
 Ultrasonic Ultra_Drt(26, 27);
 Ultrasonic Ultra_Esq(28, 29);
 Ultrasonic Ultra_Mei(30, 31);
-Adafruit_MPU6050 mpu;
+uint32_t time_Atual;
+uint32_t time_Ant;
 
 uint32_t timeZ;
 float Z_Angulo;
@@ -38,57 +38,92 @@ void setup() {
     }
   }
 
-  if (!mpu.begin()) {
-    Serial.println("Falha no MPU6050");
-    while(1);
-  }
-  mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
-  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_44_HZ);
+  analogWrite(PWMd, 75);
+  analogWrite(PWMe, 75);
 
 }
 
 void loop() {
+  time_Atual = millis();
+  //imprimirLeituras();
 
-  imprimirLeituras();
-  delay(100);
-
-  bool D4 = naLinha(IR_Pins[0]);
-  bool A0 = naLinha(IR_Pins[1]);
-  bool A1 = naLinha(IR_Pins[2]);
-  bool A2 = naLinha(IR_Pins[3]);
-  bool A3 = naLinha(IR_Pins[4]);
-
-  if(!D4 && analoRead(A0) > 500 && analogRead(A3) > 500){
-    Mapear_Area();
+  if((time_Atual - time_Ant) > 500){
+    Parar_Motores(300);
+    time_Ant = time_Atual;
   }
 
-  if(D4 && A0 && A1 && A2 && A3){
-    Mover_Frente(0);
-  }else if(D4 && !A0 && A1 && !A2 && !A3){
-    Mover_Direita();  
-  }else if(D4 && !A0 && !A1 && A2 && !A3){
+  D4_ = naLinha(0);
+  A0_ = naLinha(1);
+  A1_ = naLinha(2);
+  A2_ = naLinha(3);
+  A3_ = naLinha(4);
+
+  /*if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
+    Serial.println("Girando direita");
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(200);
+    Parar_Motores(500);
+  }else if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
+    Serial.println("Girando");
+    Parar_Motores(500);
     Mover_Esquerda();
-  }else if(!D4 && A0 && A1 && !A2 && !A3){
-    Mover_90_Graus_Direita();
-  }else if(!D4 && !A0 && !A1 && A2 && A3){
-    Mover_90_Graus_Esquerda();
-  }else if(!D4 && A0 && A1 && A2 && A3){
-    Mover_90_Graus_Esquerda();
-  }else if(!D4 && !A0 && A1 && !A2 && !A3){
-    Mover_45_Graus_Direita();
-  }else if(!D4 && !A0 && !A1 && A2 && !A3){
-    Mover_45_Graus_Esquerda();
-  }else if(D4 && A0 && A1 && !A2 && !A3){
-    Mover_Frente(0);
-  }else if(D4 && !A0 && !A1 && A2 && A3){
-    Mover_Frente(0);
-  }else if(!D4 && !A0 && A1 && A2 && !A3){
-    Mover_90_Graus_Direita();
-  }else{
+    delay(200);
+    Parar_Motores(500);
+  }else if(D4_ && !A0_ && !A1_ && !A2_ && !A3_){
+    Serial.println("Movendo para frente");
+    Mover_Frente(1);
+  }*/
+
+  if(D4_ && A0_ && A1_ && A2_ && A3_){
     Mover_Frente(0);
   }
   
+  if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(200);
+    Parar_Motores(500); 
+  }
+  
+  if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Esquerda();
+    delay(200);
+    Parar_Motores(500);
+  }
+  
+  if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
+    Mover_90_Graus_Direita();
+  }
+  
+  if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
+    Mover_90_Graus_Esquerda();
+  }
+  
+  if(!D4_ && A0_ && A1_ && A2_ && A3_){
+    Mover_90_Graus_Esquerda();
+  }
+  
+  if(D4_ && A0_ && A1_ && !A2_ && !A3_){
+    Mover_Frente(0);
+  }
+  
+  if(D4_ && !A0_ && !A1_ && A2_ && A3_){
+    Mover_Frente(0);
+  }
+  
+  if(!D4_ && !A0_ && A1_ && A2_ && !A3_){
+    Mover_90_Graus_Direita();
+  }
+  
+  if(D4_ && !A0_ && !A1_ && !A2_ && !A3_){
+    Mover_Frente(0);
+  }
+
+  delay(10);
+  state_motor = !state_motor;
+
 }
 
 void Mover_Frente(int del){
@@ -100,6 +135,8 @@ void Mover_Frente(int del){
 }
 
 void Mover_Esquerda(){
+  analogWrite(PWMd, 70);
+  analogWrite(PWMe, 70);
   digitalWrite(Motor[0], HIGH);
   digitalWrite(Motor[1], LOW);
   digitalWrite(Motor[2], LOW);
@@ -107,16 +144,19 @@ void Mover_Esquerda(){
 }
 
 void Mover_Direita(){
+  analogWrite(PWMd, 70);
+  analogWrite(PWMe, 70);
   digitalWrite(Motor[0], LOW);
   digitalWrite(Motor[1], HIGH);
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 }
 
-void Parar_Motores() {
+void Parar_Motores(int del) {
   for(int i=0;i<4;i++){
     digitalWrite(Motor[i], LOW);
   }
+  delay(del);
 }
 
 void Mover_Atras(int del){
@@ -128,60 +168,30 @@ void Mover_Atras(int del){
 }
 
 void Mover_90_Graus_Esquerda(){
-  Girar(-90);
+  Parar_Motores(500);
+  Mover_Frente(100);
+  Mover_Esquerda();
+  delay(500);
 }
 
 void Mover_90_Graus_Direita(){
-  Girar(90);
+  Parar_Motores(500);
+  Mover_Frente(100);
+  Mover_Direita();
+  delay(500);
 }
 
 void Virar_Ao_Contrario(){
-  Girar(180);
 }
 
 void Mover_45_Graus_Esquerda(){
-  Girar(-45);
 }
 
-void Mover_45_Graus_Direita(){
-  Girar(45);
+void Mover_45_Graus_Direita(){;
 }
 
-void Girar(float angulo){
-  Parara_Motores();
-  delay(100); 
-  
-  Z_Angulo = 0;
-  timeZ = micros();
 
-  if(angulo > 0){
-    while(Z_Angulo < angulo){
-      atualizar_Z_Angulo();
-      Mover_Direita();
-    }
-  } else {
-    while(Z_Angulo > angulo){
-      atualizar_Z_Angulo();
-      Mover_Esquerda();
-    }
-  }
-  
-  Parara_Motores();
-  delay(100);
-}
-
-void atualizar_Z_Angulo() {
-  float deltaT = (float)(micros() - timeZ) / 1000000.0;
-  timeZ = micros();
-
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
-
-  float gyroZ = g.gyro.z * (180.0 / PI); // graus/s
-  Z_Angulo += gyroZ * deltaT;
-}
-
-Mapear_Area(){
+/*Mapear_Area(){
   int intensidade;
   Mover_90_Graus_Direita(); //Mover o robô de frente à parede para calcular as matrizes
   if(Dist_Mei > 5){
@@ -212,12 +222,12 @@ Mapear_Area(){
 
   while(Dist_Mei > 5){
     Mover_Frente(0);
-    bool A0 = naLinha(IR_Pins[1]);
-    bool A1 = naLinha(IR_Pins[2]);
-    bool A2 = naLinha(IR_Pins[3]);
-    bool A3 = naLinha(IR_Pins[4]);
+    bool A0_ = naLinha(IR_Pins[1]);
+    bool A1_ = naLinha(IR_Pins[2]);
+    bool A2_ = naLinha(IR_Pins[3]);
+    bool A3_ = naLinha(IR_Pins[4]);
 
-    if(A0 && A1 && A2 && A3){
+    if(A0_ && A1_ && A2_ && A3_){
       Mover_Atras(0);
     }
   }
@@ -256,7 +266,7 @@ Mapear_Area(){
     Posicao[2] = 2;
   }
   
-}
+}*/
 
 bool naLinha(uint8_t index) {
   if (index == 0) {
@@ -268,14 +278,18 @@ bool naLinha(uint8_t index) {
 
 
 void imprimirLeituras() {
-  Serial.print("D4=");
-  Serial.print(naLinha(0) ? "LINHA" : "BRANCO");
-  Serial.print(" | A0=");
-  Serial.print(naLinha(1) ? "LINHA" : "BRANCO");
-  Serial.print(" | A1=");
-  Serial.print(naLinha(2) ? "LINHA" : "BRANCO");
-  Serial.print(" | A2=");
-  Serial.print(naLinha(3) ? "LINHA" : "BRANCO");
+  Serial.print("D4_=");
+  Serial.print(naLinha(0) ? " LINHA" : " BRANCO");
+  Serial.print(" | A0_= ");
+  Serial.print(analogRead(A8));
+  Serial.print(naLinha(1) ? " LINHA" : " BRANCO");
+  Serial.print(" | A1_=");
+  Serial.print(analogRead(A10));
+  Serial.print(naLinha(2) ? " LINHA" : " BRANCO");
+  Serial.print(" | A2_=");
+  Serial.print(analogRead(A5));
+  Serial.print(naLinha(3) ? " LINHA" : " BRANCO");
   Serial.print(" | A3=");
-  Serial.println(naLinha(4) ? "LINHA" : "BRANCO");
+  Serial.print(analogRead(A7));
+  Serial.println(naLinha(4) ? " LINHA" : " BRANCO");
 }
