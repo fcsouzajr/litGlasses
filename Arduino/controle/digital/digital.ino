@@ -1,4 +1,4 @@
-#include <Ultrasonic.h>
+//#include <Ultrasonic.h>
 
 uint8_t IR_Pins[5] = {4, A8, A10, A5, A7}; //pinos dos sensores infravermelhos
 uint8_t Motor[4] = {22, 23, 24, 25}; //pinos dos motores (ponte H)
@@ -7,9 +7,9 @@ uint8_t Posicao[4] = {0, 0, 0, 0};
 static bool D4_, A0_, A1_, A2_, A3_;
 static bool state_motor;
 
-Ultrasonic Ultra_Drt(26, 27);
-Ultrasonic Ultra_Esq(28, 29);
-Ultrasonic Ultra_Mei(30, 31);
+//Ultrasonic Ultra_Drt(26, 27);
+//Ultrasonic Ultra_Esq(28, 29);
+//Ultrasonic Ultra_Mei(30, 31);
 uint32_t time_Atual;
 uint32_t time_Ant;
 
@@ -81,12 +81,16 @@ void loop() {
   
   if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
+    Mover_Frente(500);
+    Parar_Motores(500);
     Mover_Direita();
     delay(200);
     Parar_Motores(500); 
   }
   
   if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Frente(200);
     Parar_Motores(500);
     Mover_Esquerda();
     delay(200);
@@ -95,14 +99,20 @@ void loop() {
   
   if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
     Mover_90_Graus_Direita();
+    Mover_Atras(500);
+    Parar_Motores(500);
   }
   
   if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
     Mover_90_Graus_Esquerda();
+    Mover_Atras(500);
+    Parar_Motores(500);
   }
   
   if(!D4_ && A0_ && A1_ && A2_ && A3_){
     Mover_90_Graus_Esquerda();
+    Mover_Atras(500);
+    Parar_Motores(500);
   }
   
   if(D4_ && A0_ && A1_ && !A2_ && !A3_){
@@ -115,9 +125,49 @@ void loop() {
   
   if(!D4_ && !A0_ && A1_ && A2_ && !A3_){
     Mover_90_Graus_Direita();
+    Mover_Atras(500);
+    Parar_Motores(500);
   }
   
   if(D4_ && !A0_ && !A1_ && !A2_ && !A3_){
+    Mover_Frente(0);
+  }
+
+  if(!D4_ && !A0_ && !A1_ && !A2_ && !A3_){
+    Mover_Frente(0);
+  }
+
+  if(!D4_ && !A0_ && A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(200);
+    Parar_Motores(500);
+  }
+
+  if(!D4_ && !A0_ && !A1_ && A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Esquerda();
+    delay(200);
+    Parar_Motores(500);
+  }
+
+  if(!D4_ && A0_ && A1_ && A2_ && !A3_){
+    Mover_90_Graus_Direita();
+    Mover_Atras(500);
+    Parar_Motores(500);
+  }
+
+  if(!D4_ && !A0_ && A1_ && A2_ && A3_){
+    Mover_90_Graus_Esquerda();
+    Mover_Atras(500);
+    Parar_Motores(500);
+  }
+
+  if(D4_ && A0_ && A1_ && A2_ && !A3_){
+    Mover_Frente(0);
+  }
+
+  if(D4_ && !A0_ && A1_ && A2_ && A3_){
     Mover_Frente(0);
   }
 
@@ -169,16 +219,16 @@ void Mover_Atras(int del){
 
 void Mover_90_Graus_Esquerda(){
   Parar_Motores(500);
-  Mover_Frente(100);
+  Mover_Frente(200);
   Mover_Esquerda();
-  delay(500);
+  delay(400);
 }
 
 void Mover_90_Graus_Direita(){
   Parar_Motores(500);
-  Mover_Frente(100);
+  Mover_Frente(200);
   Mover_Direita();
-  delay(500);
+  delay(400);
 }
 
 void Virar_Ao_Contrario(){
