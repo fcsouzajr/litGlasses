@@ -1,26 +1,34 @@
-//#include <Ultrasonic.h>
+#include <Ultrasonic.h>
 
 uint8_t IR_Pins[5] = {4, A8, A10, A5, A7}; //pinos dos sensores infravermelhos
 uint8_t Motor[4] = {22, 23, 24, 25}; //pinos dos motores (ponte H)
 uint8_t Posicao[4] = {0, 0, 0, 0}; 
-//Uma matriz para guardar onde está cada área para colocar os mortos e vivos, sendo posicao[0] o vertice inferior direito, assim por diante
+Uma matriz para guardar onde está cada área para colocar os mortos e vivos, sendo posicao[0] o vertice inferior direito, assim por diante
 static bool D4_, A0_, A1_, A2_, A3_;
-static bool state_motor;
+static bool state_motor, leitura_cor;
 
-//Ultrasonic Ultra_Drt(26, 27);
-//Ultrasonic Ultra_Esq(28, 29);
-//Ultrasonic Ultra_Mei(30, 31);
+
+Ultrasonic Ultra_Drt(26, 27);
+Ultrasonic Ultra_Esq(28, 29);
+Ultrasonic Ultra_Mei(30, 31);
 uint32_t time_Atual;
 uint32_t time_Ant;
 
 uint32_t timeZ;
 float Z_Angulo;
 
+#define SenC_D A0
+#define SenC_E A2
 #define PWMd 2
 #define PWMe 3
 #define RedPin A4
 #define GreenPin A5
 #define BluePin A6
+
+#define Limiar_Min_D_Verde 300
+#define Limiar_Min_E_Verde 300
+#define Limiar_Max_D_Verde 400
+#define Limiar_Max_E_Verde 400
 
 int limiar_branco = 690;
 
@@ -43,13 +51,14 @@ void setup() {
 
 }
 
-void loop() {
-  time_Atual = millis();
-  //imprimirLeituras();
+unsigned long tempo_bloqueio = 0;
+bool ignorarVerde = false;
 
-  if((time_Atual - time_Ant) > 500){
+void loop() {
+
+  if((millis() - time_Ant) > 500){
     Parar_Motores(300);
-    time_Ant = time_Atual;
+    time_Ant = millis();
   }
 
   D4_ = naLinha(0);
@@ -58,22 +67,37 @@ void loop() {
   A2_ = naLinha(3);
   A3_ = naLinha(4);
 
-  /*if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
-    Serial.println("Girando direita");
-    Parar_Motores(500);
-    Mover_Direita();
-    delay(200);
-    Parar_Motores(500);
-  }else if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
-    Serial.println("Girando");
-    Parar_Motores(500);
-    Mover_Esquerda();
-    delay(200);
-    Parar_Motores(500);
-  }else if(D4_ && !A0_ && !A1_ && !A2_ && !A3_){
-    Serial.println("Movendo para frente");
-    Mover_Frente(1);
-  }*/
+  bool intersecao = (D4_ && A0_ && A1_ && A2_ && A3_);
+  if(intersecao) {
+    ignorarVerde = true;
+    tempo_bloqueio = millis();
+  }
+  if(ignorarVerde && (millis() - tempo_bloqueio > 500)) {
+    ignorarVerde = false;
+  }
+
+  int cor_D = analogRead(SenC_D);
+  int cor_E = analogRead(SenC_E);
+
+  if(!ignorarVerde) {
+    if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde && cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Mover_Atras(300);
+      Parar_Motores(500);
+      Virar_Ao_Contrario();
+    }else if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde){
+      Parar_Motores(500);
+      Mover_Frente(300);
+      Mover_90_Graus_Esquerda();
+      Mover_Atras(300);
+      Parar_Motores(500);
+    }else if(cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Parar_Motores(500);
+      Mover_Frente(300);
+      Mover_90_Graus_Direita();
+      Mover_Atras(500);
+      Parar_Motores(500);
+    }
+  }
 
   if(D4_ && A0_ && A1_ && A2_ && A3_){
     Mover_Frente(0);
@@ -81,7 +105,7 @@ void loop() {
   
   if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Frente(500);
+    Mover_Frente(200);
     Parar_Motores(500);
     Mover_Direita();
     delay(200);
@@ -98,20 +122,26 @@ void loop() {
   }
   
   if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Direita();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
   
   if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Esquerda();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
   
   if(!D4_ && A0_ && A1_ && A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Esquerda();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
   
@@ -124,8 +154,10 @@ void loop() {
   }
   
   if(!D4_ && !A0_ && A1_ && A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Direita();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
   
@@ -152,14 +184,18 @@ void loop() {
   }
 
   if(!D4_ && A0_ && A1_ && A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Direita();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
 
   if(!D4_ && !A0_ && A1_ && A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Frente(300);
     Mover_90_Graus_Esquerda();
-    Mover_Atras(500);
+    Mover_Atras(300);
     Parar_Motores(500);
   }
 
@@ -173,8 +209,8 @@ void loop() {
 
   delay(10);
   state_motor = !state_motor;
-
 }
+
 
 void Mover_Frente(int del){
   digitalWrite(Motor[0], HIGH);
@@ -219,19 +255,20 @@ void Mover_Atras(int del){
 
 void Mover_90_Graus_Esquerda(){
   Parar_Motores(500);
-  Mover_Frente(200);
   Mover_Esquerda();
   delay(400);
 }
 
 void Mover_90_Graus_Direita(){
   Parar_Motores(500);
-  Mover_Frente(200);
   Mover_Direita();
   delay(400);
 }
 
 void Virar_Ao_Contrario(){
+  Parar_Motores(500);
+  Mover_Direita();
+  delay(800);
 }
 
 void Mover_45_Graus_Esquerda(){
