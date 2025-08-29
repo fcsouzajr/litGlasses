@@ -1,4 +1,15 @@
 #include <Ultrasonic.h>
+#include <Stepper.h>
+#include <Servo.h>
+
+// Stepper 28BYJ-48 (ULN2003)
+const int stepsPerRevolution = 4096;  
+Stepper myStepper(stepsPerRevolution, 50, 52, 51, 53); 
+// OBS: a ordem é (IN1, IN3, IN2, IN4), por isso ficou assim
+
+// Servos
+Servo servo1;
+Servo servo2;
 
 uint8_t IR_Pins[5] = {4, A8, A10, A5, A7}; //pinos dos sensores infravermelhos
 uint8_t Motor[4] = {22, 23, 24, 25}; //pinos dos motores (ponte H)
@@ -25,10 +36,10 @@ float Z_Angulo;
 #define GreenPin A5
 #define BluePin A6
 
-#define Limiar_Min_D_Verde 300
-#define Limiar_Min_E_Verde 300
-#define Limiar_Max_D_Verde 400
-#define Limiar_Max_E_Verde 400
+#define Limiar_Min_D_Verde 890
+#define Limiar_Min_E_Verde 820
+#define Limiar_Max_D_Verde 905
+#define Limiar_Max_E_Verde 840
 
 int limiar_branco = 690;
 
@@ -48,6 +59,10 @@ void setup() {
 
   analogWrite(PWMd, 75);
   analogWrite(PWMe, 75);
+
+  myStepper.setSpeed(10);
+  servo1.attach(8);   
+  servo2.attach(9);
 
 }
 
@@ -105,7 +120,7 @@ void loop() {
   
   if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Frente(200);
+    Mover_Atras(200);
     Parar_Motores(500);
     Mover_Direita();
     delay(200);
@@ -114,7 +129,7 @@ void loop() {
   
   if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Frente(200);
+    Mover_Atras(200);
     Parar_Motores(500);
     Mover_Esquerda();
     delay(200);
@@ -172,14 +187,14 @@ void loop() {
   if(!D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
     Mover_Direita();
-    delay(200);
+    delay(300);
     Parar_Motores(500);
   }
 
   if(!D4_ && !A0_ && !A1_ && A2_ && !A3_){
     Parar_Motores(500);
     Mover_Esquerda();
-    delay(200);
+    delay(300);
     Parar_Motores(500);
   }
 
@@ -205,6 +220,24 @@ void loop() {
 
   if(D4_ && !A0_ && A1_ && A2_ && A3_){
     Mover_Frente(0);
+  }
+
+  if(!D4_ && A0_ && !A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(300);
+    Parar_Motores(500); 
+    Mover_Frente(200);
+    Parar_Motores(500);
+  }
+
+  if(!D4_ && !A0_ && !A1_ && !A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Esquerda();
+    delay(300);
+    Parar_Motores(500); 
+    Mover_Frente(200);
+    Parar_Motores(500);
   }
 
   delay(10);
@@ -379,4 +412,23 @@ void imprimirLeituras() {
   Serial.print(" | A3=");
   Serial.print(analogRead(A7));
   Serial.println(naLinha(4) ? " LINHA" : " BRANCO");
+}
+
+void Garra(){
+  myStepper.step(-1024);
+  delay(500);
+
+  // 2. Servos vão devagar até 135°
+  for (int pos = 0; pos <= 135; pos++) {
+    servo1.write(135 - pos);
+    servo2.write(pos);
+    delay(15);  // controla a suavidade
+  }
+
+  delay(1000);
+
+  // 3. Stepper volta 90° (posição inicial)
+  myStepper.step(2048);
+
+  delay(500); // pausa antes de repetir
 }
