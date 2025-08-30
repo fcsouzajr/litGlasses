@@ -14,19 +14,16 @@ Servo servo2;
 uint8_t IR_Pins[5] = {4, A8, A10, A5, A7}; //pinos dos sensores infravermelhos
 uint8_t Motor[4] = {22, 23, 24, 25}; //pinos dos motores (ponte H)
 uint8_t Posicao[4] = {0, 0, 0, 0}; 
-Uma matriz para guardar onde está cada área para colocar os mortos e vivos, sendo posicao[0] o vertice inferior direito, assim por diante
+//Uma matriz para guardar onde está cada área para colocar os mortos e vivos, sendo posicao[0] o vertice inferior direito, assim por diante
 static bool D4_, A0_, A1_, A2_, A3_;
-static bool state_motor, leitura_cor;
+static bool state_motor = false;
+static bool leitura_cor = false;
 
 
 Ultrasonic Ultra_Drt(26, 27);
 Ultrasonic Ultra_Esq(28, 29);
 Ultrasonic Ultra_Mei(30, 31);
-uint32_t time_Atual;
 uint32_t time_Ant;
-
-uint32_t timeZ;
-float Z_Angulo;
 
 #define SenC_D A0
 #define SenC_E A2
@@ -64,6 +61,9 @@ void setup() {
   servo1.attach(8);   
   servo2.attach(9);
 
+  servo1.write(150);
+  servo2.write(0)
+
 }
 
 unsigned long tempo_bloqueio = 0;
@@ -71,9 +71,35 @@ bool ignorarVerde = false;
 
 void loop() {
 
-  if((millis() - time_Ant) > 500){
-    Parar_Motores(300);
+  int dist = Ultra_Drt.read();
+
+  if((millis() - time_Ant) > 50){
+    Parar_Motores(200);
     time_Ant = millis();
+  }
+
+  if(dist < 10){
+    Parar_Motores();
+    Mover_Esquerda();
+    delay(200);
+    Mover_Frente(150);
+    Parar_Motores(500);
+    while(true){
+      Mover_Direita(200);
+      Parar_Motores(500):
+      Mover_Frente(150);
+      Parar_Motores(500):
+
+      A0_ = naLinha(1);
+      A1_ = naLinha(2);
+      A2_ = naLinha(3);
+      A3_ = naLinha(4);
+
+      if(A0 || A1 || A2 || A3){
+        break;
+      }
+
+    }
   }
 
   D4_ = naLinha(0);
@@ -87,7 +113,7 @@ void loop() {
     ignorarVerde = true;
     tempo_bloqueio = millis();
   }
-  if(ignorarVerde && (millis() - tempo_bloqueio > 500)) {
+  if(ignorarVerde && (millis() - tempo_bloqueio > 200)) {
     ignorarVerde = false;
   }
 
@@ -96,7 +122,30 @@ void loop() {
 
   if(!ignorarVerde) {
     if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde && cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
-      Mover_Atras(300);
+      Mover_Atras(200);
+      Parar_Motores(500);
+      Virar_Ao_Contrario();
+    }else if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde){
+      Parar_Motores(500);
+      Mover_Frente(300);
+      Mover_90_Graus_Esquerda();
+      Mover_Atras(200);
+      Parar_Motores(500);
+    }else if(cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Parar_Motores(500);
+      Mover_Frente(300);
+      Mover_90_Graus_Direita();
+      Mover_Atras(200);
+      Parar_Motores(500);
+    }
+  }
+
+  if(D4_ && A0_ && A1_ && A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Frente(100);
+    Parar_Motores(500);
+    if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde && cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Mover_Atras(200);
       Parar_Motores(500);
       Virar_Ao_Contrario();
     }else if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde){
@@ -109,18 +158,16 @@ void loop() {
       Parar_Motores(500);
       Mover_Frente(300);
       Mover_90_Graus_Direita();
-      Mover_Atras(500);
+      Mover_Atras(300);
       Parar_Motores(500);
+    }else{
+      Mover_Frente(0);
     }
-  }
-
-  if(D4_ && A0_ && A1_ && A2_ && A3_){
-    Mover_Frente(0);
   }
   
   if(D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Atras(200);
+    Mover_Atras(100);
     Parar_Motores(500);
     Mover_Direita();
     delay(200);
@@ -129,50 +176,85 @@ void loop() {
   
   if(D4_ && !A0_ && !A1_ && A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Atras(200);
+    Mover_Atras(100);
     Parar_Motores(500);
     Mover_Esquerda();
     delay(200);
     Parar_Motores(500);
   }
   
-  if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
+  /*if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
     Mover_Frente(300);
     Mover_90_Graus_Direita();
-    Mover_Atras(300);
+    Mover_Atras(200);
     Parar_Motores(500);
-  }
+  }/*
   
-  if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
+  /*if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
     Parar_Motores(500);
     Mover_Frente(300);
     Mover_90_Graus_Esquerda();
-    Mover_Atras(300);
+    Mover_Atras(100);
     Parar_Motores(500);
-  }
+  }*/
   
   if(!D4_ && A0_ && A1_ && A2_ && A3_){
     Parar_Motores(500);
-    Mover_Frente(300);
-    Mover_90_Graus_Esquerda();
-    Mover_Atras(300);
+    Mover_Frente(100);
     Parar_Motores(500);
+    if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde && cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Mover_Atras(200);
+      Parar_Motores(500);
+      Virar_Ao_Contrario();
+    }else if(cor_E > Limiar_Min_E_Verde && cor_D < Limiar_Max_E_Verde){
+      Parar_Motores(500);
+      Mover_90_Graus_Esquerda();
+      Mover_Atras(100);
+      Parar_Motores(500);
+    }else if(cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Mover_90_Graus_Direita();
+      Mover_Atras(100);
+      Parar_Motores(500);
+    }else{
+      Mover_Frente(200);
+      Mover_90_Graus_Esquerda();
+      Mover_Atras(100);
+      Parar_Motores(500);
+    }
   }
   
   if(D4_ && A0_ && A1_ && !A2_ && !A3_){
-    Mover_Frente(0);
+    Parar_Motores(500);
+    Mover_Frente(100);
+    if(cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Parar_Motores(500);
+      Mover_90_Graus_Direita();
+      Mover_Atras(100);
+      Parar_Motores(500);
+    }else{
+      Mover_Frente(0);
+    }
   }
   
   if(D4_ && !A0_ && !A1_ && A2_ && A3_){
-    Mover_Frente(0);
+    Parar_Motores(500);
+    Mover_Frente(100);
+    if(cor_D > Limiar_Min_D_Verde && cor_D < Limiar_Max_D_Verde){
+      Mover_90_Graus_Esquerda();
+      Mover_Atras(100);
+      Parar_Motores(500);
+    }else{
+      Mover_Frente(0);
+    }
   }
   
   if(!D4_ && !A0_ && A1_ && A2_ && !A3_){
     Parar_Motores(500);
-    Mover_Frente(300);
-    Mover_90_Graus_Direita();
-    Mover_Atras(300);
+    Mover_Direita();
+    delay(400);
+    Parar_Motores(500);
+    Mover_Atras(100);
     Parar_Motores(500);
   }
   
@@ -187,18 +269,36 @@ void loop() {
   if(!D4_ && !A0_ && A1_ && !A2_ && !A3_){
     Parar_Motores(500);
     Mover_Direita();
-    delay(300);
+    delay(150);
     Parar_Motores(500);
   }
 
   if(!D4_ && !A0_ && !A1_ && A2_ && !A3_){
     Parar_Motores(500);
     Mover_Esquerda();
-    delay(300);
+    delay(150);
     Parar_Motores(500);
   }
 
-  if(!D4_ && A0_ && A1_ && A2_ && !A3_){
+  if(!D4_ && A0_ && A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(400);
+    Parar_Motores(500);
+    Mover_Atras(100);
+    Parar_Motores(500);
+  }
+
+  if(!D4_ && !A0_ && !A1_ && A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Esquerda();
+    delay(400);
+    Parar_Motores(500);
+    Mover_Atras(100);
+    Parar_Motores(500);
+  }
+
+  /*if(!D4_ && A0_ && A1_ && A2_ && !A3_){
     Parar_Motores(500);
     Mover_Frente(300);
     Mover_90_Graus_Direita();
@@ -212,7 +312,7 @@ void loop() {
     Mover_90_Graus_Esquerda();
     Mover_Atras(300);
     Parar_Motores(500);
-  }
+  }*/
 
   if(D4_ && A0_ && A1_ && A2_ && !A3_){
     Mover_Frente(0);
@@ -240,8 +340,29 @@ void loop() {
     Parar_Motores(500);
   }
 
-  delay(10);
-  state_motor = !state_motor;
+  if(D4_ && !A0_ && !A1_ && !A2_ && A3_){
+    Parar_Motores(500);
+    Mover_Atras(100);
+    Parar_Motores(500);
+    Mover_Esquerda();
+    delay(300);
+    Parar_Motores(500); 
+    Mover_Frente(100);
+    Parar_Motores(500);
+  }
+
+  if(D4_ && A0_ && !A1_ && !A2_ && !A3_){
+    Parar_Motores(500);
+    Mover_Atras(100);
+    Parar_Motores(500);
+    Mover_Direita();
+    delay(300);
+    Parar_Motores(500); 
+    Mover_Frente(100);
+    Parar_Motores(500);
+  }
+
+  delay(50);
 }
 
 
@@ -254,8 +375,8 @@ void Mover_Frente(int del){
 }
 
 void Mover_Esquerda(){
-  analogWrite(PWMd, 70);
-  analogWrite(PWMe, 70);
+  analogWrite(PWMd, 75);
+  analogWrite(PWMe, 75);
   digitalWrite(Motor[0], HIGH);
   digitalWrite(Motor[1], LOW);
   digitalWrite(Motor[2], LOW);
@@ -263,8 +384,8 @@ void Mover_Esquerda(){
 }
 
 void Mover_Direita(){
-  analogWrite(PWMd, 70);
-  analogWrite(PWMe, 70);
+  analogWrite(PWMd, 75);
+  analogWrite(PWMe, 75);
   digitalWrite(Motor[0], LOW);
   digitalWrite(Motor[1], HIGH);
   digitalWrite(Motor[2], HIGH);
@@ -289,19 +410,19 @@ void Mover_Atras(int del){
 void Mover_90_Graus_Esquerda(){
   Parar_Motores(500);
   Mover_Esquerda();
-  delay(400);
+  delay(500);
 }
 
 void Mover_90_Graus_Direita(){
   Parar_Motores(500);
   Mover_Direita();
-  delay(400);
+  delay(500);
 }
 
 void Virar_Ao_Contrario(){
   Parar_Motores(500);
   Mover_Direita();
-  delay(800);
+  delay(1400);
 }
 
 void Mover_45_Graus_Esquerda(){
@@ -311,8 +432,7 @@ void Mover_45_Graus_Direita(){;
 }
 
 
-/*Mapear_Area(){
-  int intensidade;
+/*  Mapear_Area(){
   Mover_90_Graus_Direita(); //Mover o robô de frente à parede para calcular as matrizes
   if(Dist_Mei > 5){
     while(Dist_Mei > 5){
@@ -321,15 +441,7 @@ void Mover_45_Graus_Direita(){;
     Parar_Motores();
   }
   
-  intensidade = analogRead(RedPin) + analogRead(GreenPin) + analogRead(BluePin);
 
-  if(intensidade > limiar_branco){
-    Posicao[0] = 0;
-  }else if(analogRead(RedPin) > analogRead(GreenPin)){
-    Posicao[0] = 1;
-  }else{
-    Posicao[0] = 2;
-  }
 
   Mover_90_Graus_Esquerda();
   Mover_Frete(0);
@@ -391,8 +503,10 @@ void Mover_45_Graus_Direita(){;
 bool naLinha(uint8_t index) {
   if (index == 0) {
     return digitalRead(IR_Pins[0]) == LOW;
-  } else {
-    return analogRead(IR_Pins[index]) < 300;
+  }else if(index == 1){
+    return analogRead(IR_Pins[1]) < 400;
+  }else {
+    return analogRead(IR_Pins[index]) < 200;
   }
 }
 
@@ -418,17 +532,15 @@ void Garra(){
   myStepper.step(-1024);
   delay(500);
 
-  // 2. Servos vão devagar até 135°
-  for (int pos = 0; pos <= 135; pos++) {
-    servo1.write(135 - pos);
+  for (int pos = 0; pos <= 150; pos++) {
+    servo1.write(150 - pos);
     servo2.write(pos);
-    delay(15);  // controla a suavidade
+    delay(15);
   }
 
   delay(1000);
 
-  // 3. Stepper volta 90° (posição inicial)
-  myStepper.step(2048);
+  myStepper.step(1024);
 
-  delay(500); // pausa antes de repetir
+  delay(500);
 }
