@@ -8,8 +8,8 @@
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
 
-SoftwareSerial Tx(10, 11); //Criando objeto para a biblioteca e se comunicar com o modulo bluetooth
-SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comunicar com o celular
+SoftwareSerial Tx(7, 6); //Criando objeto para a biblioteca e se comunicar com o modulo bluetooth
+SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comunicar com o celular, RX --- TX
 
 #define Bot 2 //definição dos botões
 #define Bot2 3
@@ -167,6 +167,7 @@ void setup() {
   Tx.begin(9600); //definindo baund rate do modulo bluetooth
   Cell.begin(9600);
   Serial.begin(9600);
+  Serial.println("Iniciando");
   oled.begin(&Adafruit128x64, 0x3C);
   if(!SD.begin(SD_CS)){
     Serial.println(F("Erro ao inciar SD"));
@@ -253,7 +254,7 @@ void bot1() {
           navegarSelecionar();
         }else{
           cont++;
-          navegar(16);
+          navegar(13);
         }
       }else{
         executar();
@@ -303,7 +304,7 @@ void bot2() {
         if(cont < 0){
           cont = 0;
         }
-        navegar(-16);  
+        navegar(-13);  
       }else{
         navegar(1);
       }
@@ -323,25 +324,22 @@ void bot2() {
         indice = 0;
         mostrarMenu();
       }else{
-        navegar(3);
-      }
-    }else if (Contador2 == 4 && Condi) {
-      if(emOp){
-        opAtual = 0;
-        digitar = false;
-        emOp = false;
-        emSub = true;
-        indice = 0;
-        mostrarSubMenu();
-      }else if(emSub){
-        menuAtual = 0;
-        digitar = false;
-        emOp = false;
-        emSub = false;
-        indice = 0;
-        Cell.println("VOLTAR");
-
-        mostrarMenu();
+        if(emOp){
+          opAtual = 0;
+          digitar = false;
+          emOp = false;
+          emSub = true;
+          indice = 0;
+          mostrarSubMenu();
+        }else if(emSub){
+          menuAtual = 0;
+          digitar = false;
+          emOp = false;
+          emSub = false;
+          indice = 0;
+          Cell.println("VOLTAR");
+          mostrarMenu();
+        }
       }
     }
     Contador2 = 0;
@@ -490,8 +488,8 @@ void mostrarTeclado(){
   indice %= sizeof(tecladoABC) / sizeof(tecladoABC[0]);
 
   for(uint8_t i = 0; i < (sizeof(tecladoABC) / sizeof(tecladoABC[0])); i++){
-    uint8_t x = (i % 16) * 8;
-    uint8_t y = (i / 16) + 1;
+    uint8_t x = (i % 13) * 8;
+    uint8_t y = (i / 13) + 1;
 
     if(i == indice && !emSelecionar){ //mesmo caso lá de cima, para evitar confusão tira a marcação
       oled.setInvertMode(true);
