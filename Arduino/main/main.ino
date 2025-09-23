@@ -8,7 +8,6 @@
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
 
-SoftwareSerial Tx(7, 6); //Criando objeto para a biblioteca e se comunicar com o modulo bluetooth
 SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comunicar com o celular, RX --- TX
 
 #define Bot 2 //definição dos botões
@@ -43,7 +42,7 @@ struct opData {
 };
 
 opData Sala[] = {
-  {"RL1", "0", false},
+  {"RL1", "0", false}, 
   {"RL2", "1", false},
   {"TV", "2", false}
 };
@@ -127,7 +126,7 @@ const char SubMen_Nesce[] PROGMEM = "Nescessidade";
 
 const char* const subMenuMensagem[] PROGMEM = {SubMen_Perig, SubMen_Nesce}; 
 //teclado
-const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ "};
+const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
 //opções do submenu automação
 const char opSala_Rl1[] PROGMEM = "Rele 1";
 const char opSala_Rl2[] PROGMEM = "Rele 2";
@@ -164,11 +163,11 @@ static bool emOp = false; //saber se está nas opç~es de submenu
 static bool digitar = false; //variável para saber se está no modo de digitação
 
 void setup() {
-  Tx.begin(9600); //definindo baund rate do modulo bluetooth
-  Cell.begin(9600);
+  Cell.begin(9600); 
   Serial.begin(9600);
   Serial.println("Iniciando");
   oled.begin(&Adafruit128x64, 0x3C);
+  
   if(!SD.begin(SD_CS)){
     Serial.println(F("Erro ao inciar SD"));
   }else{
@@ -201,7 +200,7 @@ void loop() {
     Serial.print(recebido);
 
     for(uint8_t x = 0; x < sizeof(cmds) / sizeof(cmds[0]); x++){ //fica repetindo 
-      if(strcmp(recebido, cmds[x].nome) == 0){ //se o dado recebido for = nome 
+      if(strcmp(recebido, cmds[x].nome) == 0){ //se o dado recebido for igual ao nome 
         cmds[x].func(); //executa a função
         break; //para o loop
       }
@@ -607,7 +606,6 @@ void executarOp(){
   oled.clear();
   oled.setCursor(0, 0);
   oled.print(dados[indice].mensagem);
-  Tx.print(dados[indice].comandoSerial);
   dados[indice].state = !dados[indice].state;
   snprintf(buffer, sizeof(buffer), "%s%s", dados[indice].mensagem, dados[indice].state ? "ON" : "OFF");
   Cell.print(buffer);
