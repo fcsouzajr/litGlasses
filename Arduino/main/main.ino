@@ -37,32 +37,31 @@ static bool execut = false;
 //Estrutura e controle de opções
 struct opData {
   const char* mensagem; //mensagem que aparece no display
-  const char* comandoSerial; //codigo que é enviado por comunicação UART
   bool state; //vai mostrar o estado que está o pino em questão
 };
 
 opData Sala[] = {
-  {"RL1", "0", false}, 
-  {"RL2", "1", false},
-  {"TV", "2", false}
+  {"RL1", false}, 
+  {"RL2", false},
+  {"TV", false}
 };
 
 opData Quarto1[] = {
-  {"RL1", "3", false},
-  {"RL2", "4", false},
-  {"TV", "5", false}
+  {"RL1", false},
+  {"RL2", false},
+  {"TV", false}
 };
 
 opData Quarto2[] = {
-  {"RL1", "6", false},
-  {"RL2", "7", false},
-  {"TV", "8", false}
+  {"RL1", false},
+  {"RL2", false},
+  {"TV", false}
 };
 
 opData Cozinha[] = {
-  {"RL1", "9", false},
-  {"RL2", "10", false},
-  {"Eltr", "11", false}
+  {"RL1", false},
+  {"RL2", false},
+  {"Eltr", false}
 };
 
 typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
@@ -611,7 +610,7 @@ void executarOp(){
   Cell.print(buffer);
   delay(2000);
   oled.clear();
-  memset(buffer, '\0', sizeof(buffer));
+  memset(buffer, '\0', sizeof(buffer)); //esvazia o buffer novamente
   delay(100);
   mostrarOp();
 }
