@@ -166,7 +166,6 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Iniciando");
   oled.begin(&Adafruit128x64, 0x3C);
-  
   if(!SD.begin(SD_CS)){
     Serial.println(F("Erro ao inciar SD"));
   }else{
@@ -190,13 +189,9 @@ void loop() {
 
   if(Cell.available() > 0){
 
-    Serial.print(F("RECEBIDO"));
-
     char recebido[8];
     int len = Cell.readBytesUntil('\n', recebido, 8);
     recebido[len] = '\0'; // completa o char para usar os métodos de C
-
-    Serial.print(recebido);
 
     for(uint8_t x = 0; x < sizeof(cmds) / sizeof(cmds[0]); x++){ //fica repetindo 
       if(strcmp(recebido, cmds[x].nome) == 0){ //se o dado recebido for igual ao nome 
@@ -269,7 +264,6 @@ void bot1() {
         }
       }else{
         Condi = !Condi;
-        Serial.println("AA");
       }
     }
     Contador = 0;
@@ -354,8 +348,6 @@ void mostrarMenu() {
 
   for(uint8_t i = 0; i < 3; i++){
 
-    Serial.println("jo");
-
      strcpy_P(buffer, (char*)pgm_read_word(&(menuPrincipal[i])));
 
     uint8_t y = i + 1;
@@ -366,15 +358,10 @@ void mostrarMenu() {
     }
     oled.setCursor(0, y);
     oled.print(buffer);
-    Serial.println(buffer);
 
   }
 
   memset(buffer, '\0', sizeof(buffer));
-
-  delay(100);
-
-  Serial.println("ok");
 }
 
 void mostrarSubMenu(){
@@ -399,9 +386,6 @@ void mostrarSubMenu(){
   }
 
   memset(buffer, '\0', sizeof(buffer));
-
-  delay(100);
-
 }
 
 void mostrarOp(){
@@ -460,9 +444,6 @@ void mostrarOp(){
   }
 
   memset(buffer, '\0', sizeof(buffer));
-
-  delay(100);
-
 }
 
 void mostrarTeclado(){
@@ -497,8 +478,6 @@ void mostrarTeclado(){
     oled.setCursor(x, y);
     oled.print(tecladoABC[i]);
   }
-
-  delay(100);
 }
 
 void executar(){
@@ -506,7 +485,6 @@ void executar(){
     executarOp();
   }else if(emSub){
     if(digitar){ //se digitar = true, vai executar a frase
-      delay(100);
       executarFrase();
     }else if(menuAtual == 2){
       opAtual = indice + 1; //se não, vai entrar na opção que selecinou no menu de automação
@@ -518,7 +496,6 @@ void executar(){
       opAtual = indice + 1; //entra na opção de mensagem que você selecionou
       indice = 0;
       mostrarMsg();
-      delay(100);
       mostrarSubMensagem();
     }
   }else{
@@ -528,15 +505,12 @@ void executar(){
     indice = 0;
     if(menuAtual == 1){ //se estiver em comunicão, vai mostrar o teclado
       digitar = true; 
-      delay(100);
       mostrarTeclado();
       Cell.println("BTTECLADO");
     }else if(menuAtual == 2){
-      delay(100);
       mostrarSubMenu(); //se tiver em automação vai mostrar as subopções (Quarto1 etc) de automação
       Cell.println("BTAUTOMACAO");
     }else{
-      delay(100);
       mostrarSubMensagem();
       Cell.println("BTMSG");
     }
@@ -565,7 +539,6 @@ void mostrarSubMensagem(){
   }
 
   memset(buffer, '\0', sizeof(buffer));
-  delay(100);
 }
 
 void mostrarMsg(){
@@ -611,7 +584,6 @@ void executarOp(){
   delay(2000);
   oled.clear();
   memset(buffer, '\0', sizeof(buffer)); //esvazia o buffer novamente
-  delay(100);
   mostrarOp();
 }
 
@@ -658,7 +630,6 @@ void executarFrase(){
   }
 
   arquivo.close();
-  delay(100);
   mostrarTeclado();
 }
 
@@ -670,21 +641,16 @@ void navegar(int num){
   }
 
   if(emOp){
-    delay(100);
     mostrarOp();
   }else if(emSub){
     if(digitar){
-      delay(100);
       mostrarTeclado();
     }else if(menuAtual == 2){
-      delay(100);
       mostrarSubMenu();
     }else{
-      delay(100);
       mostrarSubMensagem();
     }
   }else{
-    delay(100);
     mostrarMenu();
   }
 }
@@ -695,11 +661,9 @@ void navegarSelecionar(){
     indice = 0;
     cont = 0;
     emSelecionar = false;
-    delay(100);
     mostrarTeclado();
   }else if (emSelecionar){
     indiceN++;
-    delay(100);
     mostrarTeclado();
   }
 }
