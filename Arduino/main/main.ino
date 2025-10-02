@@ -84,15 +84,15 @@ struct Comando{
 };
 
 Comando cmds[] = {
-  {"AUTON", funcAUTON}, //comando para ir pro submenu automação
-  {"TCLN", funcTCLN}, //comando pra ir pro submenu de teclado
-  {"SALA", funcSALA}, //comando para ir pras opções de sala
-  {"QRT1", funcQRT1}, //comando para ir pras opções de quarto 1
-  {"QRT2", funcQRT2}, //comando pra ir pras opções de quarto 2
-  {"CZNH", funcCZNH}, //comando pra ir pras opções da cozinha
-  {"VM", funcVM}, //comando para voltar pro menu principal
-  {"RL1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
-  {"RL2Q1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
+  {"AT", funcAUTON}, //comando para ir pro submenu automação
+  {"TC", funcTCLN}, //comando pra ir pro submenu de teclado
+  {"SA", funcSALA}, //comando para ir pras opções de sala
+  {"Q1", funcQRT1}, //comando para ir pras opções de quarto 1
+  {"Q2", funcQRT2}, //comando pra ir pras opções de quarto 2
+  {"CO", funcCZNH}, //comando pra ir pras opções da cozinha
+  {"VT", funcVM}, //comando para voltar pro menu principal
+  {"LQ1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
+  {"PQ1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
   {"TVQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
   {"VM", funcVM}
 };
