@@ -41,9 +41,9 @@ struct opData {
 };
 
 opData Sala[] = {
-  {"L1Q1", false}, 
-  {"L2Q1", false},
-  {"PQ1", false}
+  {"LS", false}, 
+  {"LS", false},
+  {"RS", false}
 };
 
 opData Quarto1[] = {
