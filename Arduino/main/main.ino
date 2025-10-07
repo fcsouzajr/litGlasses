@@ -41,27 +41,27 @@ struct opData {
 };
 
 opData Sala[] = {
-  {"RL1", false}, 
-  {"RL2", false},
-  {"TV", false}
+  {"L1Q1", false}, 
+  {"L2Q1", false},
+  {"PQ1", false}
 };
 
 opData Quarto1[] = {
-  {"RL1", false},
-  {"RL2", false},
-  {"TV", false}
+  {"L1Q1", false},
+  {"L1Q1", false},
+  {"PQ1", false}
 };
 
 opData Quarto2[] = {
-  {"RL1", false},
-  {"RL2", false},
-  {"TV", false}
+  {"L1Q2", false},
+  {"L2Q2", false},
+  {"PQ2", false}
 };
 
 opData Cozinha[] = {
-  {"RL1", false},
-  {"RL2", false},
-  {"Eltr", false}
+  {"L1C", false},
+  {"L2C", false},
+  {"RC", false}
 };
 
 typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
@@ -76,7 +76,15 @@ void funcVM();
 void funcRL1Q1();
 void funcRL2Q1();
 void funcTVQ1();
-
+void funcRL1Q2();
+void funcRL2Q2();
+void funcTVQ2();
+void funcRL1CZ();
+void funcRL2CZ();
+void funcETRCZ();
+void funcRL1SL();
+void funcRL2SL();
+void funcTVSL();
 
 struct Comando{
   const char* nome;
@@ -91,9 +99,18 @@ Comando cmds[] = {
   {"Q2", funcQRT2}, //comando pra ir pras opções de quarto 2
   {"CO", funcCZNH}, //comando pra ir pras opções da cozinha
   {"VT", funcVM}, //comando para voltar pro menu principal
-  {"LQ1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
-  {"PQ1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
-  {"TVQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
+  {"L1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
+  {"R1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
+  {"PQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
+  {"L1Q2", funcRL1Q2} //comando para selecioar opção rele 1 quarto 2
+  {"R2", funcRL2Q2} //comando para selecionar opção do rele 2 quarto 2
+  {"PQ2", funcTVQ2} //comando para selecionar opção tv quarto 2
+  {"L1C", funcRL1CZ} //comando para selecionar opção rele 1 cozinha
+  {"L2C", funcRL2CZ} //comando para selecionar opção rele 2 cozinha
+  {"RC", funcETRCZ} // comano para seleconar eletrodoméstico de cozinha
+  {"LS", funcRL1SL} //comando para selecionar relé 1 sala
+  {"L2S", funcRL2SL} //comando para selecionar relé 2 sala
+  {"RS", funcTVSL} //comando para selecionar TV sala
   {"VM", funcVM}
 };
 
@@ -401,28 +418,28 @@ void mostrarOp(){
       oled.print(F("Sala-Auto"));
       opMenu = opSala; //aponta em que endereço da memória (flash) está oq tu quer
       tamanho = opSala_Total;
-      Cell.println("BTAUTO S"); //envia pro aplicativo que tá na opção se sala
+      Cell.println("SA"); //envia pro aplicativo que tá na opção se sala
     break;
     case 2:
       oled.setCursor(0, 0);
       oled.print(F("Quarto1-Auto"));
       opMenu = opQuarto1;
       tamanho = opQ1_Total;
-      Cell.println("BTAUTO Q1"); //envia para o aplicativo que tá na opção de quarto 1
+      Cell.println("Q1"); //envia para o aplicativo que tá na opção de quarto 1
     break;
     case 3:
       oled.setCursor(0,0);
       oled.print(F("Quarto2-Auto"));
       opMenu = opQuarto2;
       tamanho = opQ2_Total;
-      Cell.println("BTAUTO Q2"); //envia para o aplicativo que tá na opção de quarto 2
+      Cell.println("Q2"); //envia para o aplicativo que tá na opção de quarto 2
     break;
     case 4:
       oled.setCursor(0, 0);
       oled.print(F("Cozinha-Auto"));
       opMenu = opCozinha;
       tamanho = opCz_Total;
-      Cell.println(F("BTAUTO C")); //envia para o aplicativo que tá na opção da cozinha 
+      Cell.println(F("CO")); //envia para o aplicativo que tá na opção da cozinha 
     break;
   }
 
@@ -506,10 +523,10 @@ void executar(){
     if(menuAtual == 1){ //se estiver em comunicão, vai mostrar o teclado
       digitar = true; 
       mostrarTeclado();
-      Cell.println("BTTECLADO");
+      Cell.println("TEC");
     }else if(menuAtual == 2){
       mostrarSubMenu(); //se tiver em automação vai mostrar as subopções (Quarto1 etc) de automação
-      Cell.println("BTAUTOMACAO");
+      Cell.println("AUT");
     }else{
       mostrarSubMensagem();
       Cell.println("BTMSG");
@@ -668,6 +685,16 @@ void navegarSelecionar(){
   }
 }
 
+void funcVM(){
+  menuAtual = 0;
+  digitar = false;
+  emOp = false;
+  emSub = false;
+  indice = 0;
+
+  mostrarMenu();
+}
+
 void funcTCLN(){
   indice = 0;
   executar();
@@ -680,26 +707,10 @@ void funcAUTON(){
   execut = true;
 }
 
-void funcSALA(){
-  indice = 0;
-  executar();
-  execut = true;
-}
+//==============================================================Quarto 1===========================================
 
 void funcQRT1(){
   indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcQRT2(){
-  indice = 2;
-  executar();
-  execut = true;
-}
-
-void funcCZNH(){
-  indice = 3;
   executar();
   execut = true;
 }
@@ -722,13 +733,83 @@ void funcTVQ1(){
   execut = true;
 }
 
-void funcVM(){
-  menuAtual = 0;
-  digitar = false;
-  emOp = false;
-  emSub = false;
-  indice = 0;
+//==============================================================Quarto 2===========================================
 
-  mostrarMenu();
+void funcQRT2(){
+  indice = 2;
+  executar();
+  execut = true;
 }
+
+void funcRL1Q2(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcRL2Q2(){
+  indice = 1;
+  executar();
+  execut = true;
+}
+
+void funcTVQ2(){
+  indice = 2;
+  executar();
+  execut = true;
+}
+
+//==============================================================Cozinha===========================================
+
+void funcCZNH(){
+  indice = 3;
+  executar();
+  execut = true;
+}
+
+void funcRL1CZ(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcRL2CZ(){
+  indice = 1;
+  executar();
+  execut = true;
+}
+
+void funcETRCZ(){
+  indice = 2;
+  executar();
+  execut = true;
+}
+
+//==============================================================Sala===========================================
+
+void funcSALA(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcRL1SL(){
+  indice = 0;
+  executar();
+  execut = true;
+}
+
+void funcRL2SL(){
+  indice = 1;
+  executar();
+  execut = true;
+}
+
+void funcTVSL(){
+  indice = 2;
+  executar();
+  execut = true;
+}
+
+
 
