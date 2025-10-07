@@ -4,7 +4,7 @@
 #include <SoftwareSerial.h>
 #include <SPI.h>
 
-#define SD_CS 10
+#define SD_CS 8
 
 SSD1306AsciiAvrI2c oled; //objeto da biblioteca para manipulação gráfica do display
 
@@ -102,15 +102,15 @@ Comando cmds[] = {
   {"L1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
   {"R1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
   {"PQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
-  {"L1Q2", funcRL1Q2} //comando para selecioar opção rele 1 quarto 2
-  {"R2", funcRL2Q2} //comando para selecionar opção do rele 2 quarto 2
-  {"PQ2", funcTVQ2} //comando para selecionar opção tv quarto 2
-  {"L1C", funcRL1CZ} //comando para selecionar opção rele 1 cozinha
-  {"L2C", funcRL2CZ} //comando para selecionar opção rele 2 cozinha
-  {"RC", funcETRCZ} // comano para seleconar eletrodoméstico de cozinha
-  {"LS", funcRL1SL} //comando para selecionar relé 1 sala
-  {"L2S", funcRL2SL} //comando para selecionar relé 2 sala
-  {"RS", funcTVSL} //comando para selecionar TV sala
+  {"L1Q2", funcRL1Q2}, //comando para selecioar opção rele 1 quarto 2
+  {"R2", funcRL2Q2}, //comando para selecionar opção do rele 2 quarto 2
+  {"PQ2", funcTVQ2}, //comando para selecionar opção tv quarto 2
+  {"L1C", funcRL1CZ}, //comando para selecionar opção rele 1 cozinha
+  {"L2C", funcRL2CZ}, //comando para selecionar opção rele 2 cozinha
+  {"RC", funcETRCZ}, // comano para seleconar eletrodoméstico de cozinha
+  {"LS", funcRL1SL}, //comando para selecionar relé 1 sala
+  {"L2S", funcRL2SL}, //comando para selecionar relé 2 sala
+  {"RS", funcTVSL}, //comando para selecionar TV sala
   {"VM", funcVM}
 };
 
