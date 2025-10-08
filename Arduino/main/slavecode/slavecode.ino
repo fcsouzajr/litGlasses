@@ -1,8 +1,10 @@
 #include <SoftwareSerial.h>
 
-SoftwareSerial Cell(2, 3); //rx e tx
+SoftwareSerial Cell(10, 11); //rx e tx
 
-uint8_t pins[] = {4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+uint8_t pins[] = {2, 3, 4, 5, 6, 7, 8, 9, 12, 13};
+
+typedef void (*funcMain)(); 
 
 void funcL1Q1ON();
 void funcL1Q1OFF();
@@ -68,18 +70,20 @@ void setup() {
   
   for(uint8_t x = 0; x < sizeof(pins) / sizeof(pins[0]); x++){
     pinMode(pins[x], OUTPUT);
-    digitalWrite(pins[i], HIGH); // relé desligado no início
+    digitalWrite(pins[x], LOW); // relé desligado no início
   }
 
 }
 
 void loop() {
 
-  if(Cell.available() > 0){
-    
+  if(Cell.available()){
+    Serial.println("Recebeu comando");
     char recebido[10]; //criamos um char para armazenar as mensagens recebidas
     int len = Cell.readBytesUntil('\n', recebido, 10); //lê o que é recebido pelo serial até encontrar o caractere '\n' ou completar o limite de bytes (10)
-    recebido[len] = '\0'; \\completa o char para poder utilizar os métodos de C
+    recebido[len] = '\0'; //completa o char para poder utilizar os métodos de C
+
+    Serial.println(recebido);
     
     for(uint8_t x = 0; x < sizeof(rcb) / sizeof(rcb[0]); x++){
       if(strcmp(recebido, rcb[x].receber) == 0){ //se o dado recebido for igual ao caractere que está no vetor
@@ -88,14 +92,16 @@ void loop() {
       }
     }
   }
+
+  delay(200);
 }
 
 // ===== L1Q1 =====
 void funcL1Q1ON(){ 
-  digitalWrite(pins[0], LOW); 
+  digitalWrite(pins[0], HIGH); 
 }
 void funcL1Q1OFF(){
-  digitalWrite(pins[0], HIGH); 
+  digitalWrite(pins[0], LOW); 
 }
 
 // ===== L2Q1 =====
