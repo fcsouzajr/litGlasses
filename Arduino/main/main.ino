@@ -12,7 +12,7 @@ SoftwareSerial Cell(4, 5); //criando objeto para outro módulo bluetooth se comu
 
 #define Bot 2 //definição dos botões
 #define Bot2 3
-#define led 7
+#define led 13
 
 #define Colunas 3 //configuração para as colunas e a largura (em pixeis);
 #define Largura 40;
@@ -232,7 +232,7 @@ void loop() {
   Serial.print("digitar: "); Serial.println(digitar);
   Serial.print("emSelecionar: "); Serial.println(emSelecionar);
   Serial.println("----------------------");*/
-  delay(100);
+  delay(200);
 }
 
 void bot1() {
@@ -326,7 +326,8 @@ void bot2() {
         emSelecionar = false;
         oled.clear();
         oled.print(fraseFinal);
-        //Cell.println("MSG: " + fraseFinal); //mandando a frase para o celular
+        Cell.print("MSG: "); //mandando a frase para o celular
+        Cell.println(fraseFinal);
         delay(3000);
         memset(fraseDigitada, '\0', sizeof(fraseDigitada));
         memset(fraseFinal, '\0', sizeof(fraseFinal));
