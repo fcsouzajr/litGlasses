@@ -150,15 +150,15 @@ const char opSala_Tv[] PROGMEM = "TV";
 
 const char* const opSala[] PROGMEM = {opSala_Rl1, opSala_Rl2, opSala_Tv};
 
-const char opQ1_Rl1[] PROGMEM = "Rele 1";
-const char opQ1_Rl2[] PROGMEM = "Rele 2";
-const char opQ1_Tv[] PROGMEM = "TV";
+const char opQ1_Rl1[] PROGMEM = "Lamp 1";
+const char opQ1_Rl2[] PROGMEM = "Rele";
+const char opQ1_Tv[] PROGMEM = "PORTA";
 
 const char* const opQuarto1[] PROGMEM = {opQ1_Rl1, opQ1_Rl2, opQ1_Tv};
 
-const char opQ2_Rl1[] PROGMEM = "Rele 1";
-const char opQ2_Rl2[] PROGMEM = "Rele 2";
-const char opQ2_Tv[] PROGMEM = "TV";
+const char opQ2_Rl1[] PROGMEM = "lamp 1";
+const char opQ2_Rl2[] PROGMEM = "Rele";
+const char opQ2_Tv[] PROGMEM = "PORTA";
 
 const char* const opQuarto2[] PROGMEM = {opQ2_Rl1, opQ2_Rl2, opQ2_Tv};
 
