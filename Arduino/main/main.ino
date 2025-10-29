@@ -597,8 +597,7 @@ void executarOp(){
   oled.setCursor(0, 0);
   oled.print(dados[indice].mensagem);
   dados[indice].state = !dados[indice].state;
-  snprintf(buffer, sizeof(buffer), "%s%s", dados[indice].mensagem, dados[indice].state ? "ON" : "OFF");
-  Cell.print(buffer);
+  Cell.print(dados[indice].mensagem);
   delay(2000);
   oled.clear();
   memset(buffer, '\0', sizeof(buffer)); //esvazia o buffer novamente
