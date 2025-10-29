@@ -1,4 +1,7 @@
 #include <SoftwareSerial.h>
+#include <VarSpeedServo.h>
+
+VarSpeedServo servo;
 
 SoftwareSerial Cell(10, 11); //rx e tx
 
@@ -70,8 +73,10 @@ void setup() {
   
   for(uint8_t x = 0; x < sizeof(pins) / sizeof(pins[0]); x++){
     pinMode(pins[x], OUTPUT);
-    digitalWrite(pins[x], LOW); // relé desligado no início
   }
+
+  servo.attach(pins[2]);
+  servo.write(0);
 
 }
 
@@ -114,10 +119,10 @@ void funcL2Q1OFF(){
 
 // ===== PQ1 =====
 void funcPQ1ON(){ 
-  digitalWrite(pins[2], LOW);
+  servo.write(180, 100);
 }
 void funcPQ1OFF(){ 
-  digitalWrite(pins[2], HIGH); 
+  servo.write(0, 100);
 }
 
 // ===== L1Q2 =====
