@@ -116,7 +116,7 @@ Comando cmds[] = {
 
 #define Menu_Total 3
 #define SubAuto_Total 4
-#define SubMen_Total 2
+#define SubMen_Total 1
 #define opSala_Total 3
 #define opQ1_Total 3
 #define opQ2_Total 3
@@ -137,10 +137,9 @@ const char SubAuto_Coz[] PROGMEM = "Cozinha";
 
 const char* const subMenuAutomacao[] PROGMEM = {SubAuto_Sl, SubAuto_Q1, SubAuto_Q2, SubAuto_Coz};
 
-const char SubMen_Perig[] PROGMEM = "Perigo";
-const char SubMen_Nesce[] PROGMEM = "Nescessidade";
+const char SubMen_Perig[] PROGMEM = "Escolha o contato no app";
 
-const char* const subMenuMensagem[] PROGMEM = {SubMen_Perig, SubMen_Nesce}; 
+const char* const subMenuMensagem[] PROGMEM = {SubMen_Perig}; 
 //teclado
 const char  tecladoABC[28] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
 //opções do submenu automação
@@ -315,24 +314,45 @@ void bot2() {
         }
         navegar(-13);  
       }else{
-        navegar(1);
+        if(menuAtual == 3){
+          Cell.print("BAIXO");
+        }else{
+          navegar(1);
+        }
       }
     }else if (Contador2 == 3 && Condi) {
       if(digitar){
-        indiceN = -1;
-        cont = 0;
-        digitar = false;
-        emSub = false;
-        emSelecionar = false;
-        oled.clear();
-        oled.print(fraseFinal);
-        Cell.print("MSG: "); //mandando a frase para o celular
-        Cell.println(fraseFinal);
-        delay(3000);
-        memset(fraseDigitada, '\0', sizeof(fraseDigitada));
-        memset(fraseFinal, '\0', sizeof(fraseFinal));
-        indice = 0;
-        mostrarMenu();
+        if(emOp){
+          indiceN = -1;
+          cont = 0;
+          digitar = false;
+          emSub = false;
+          emSelecionar = false;
+          oled.clear();
+          oled.print(fraseFinal);
+          Cell.print("MSGC:"); //mandando a frase para o celular
+          Cell.println(fraseFinal);
+          delay(3000);
+          memset(fraseDigitada, '\0', sizeof(fraseDigitada));
+          memset(fraseFinal, '\0', sizeof(fraseFinal));
+          indice = 0;
+          mostrarMenu();
+        }else{
+          indiceN = -1;
+          cont = 0;
+          digitar = false;
+          emSub = false;
+          emSelecionar = false;
+          oled.clear();
+          oled.print(fraseFinal);
+          Cell.print("MSG:"); //mandando a frase para o celular
+          Cell.println(fraseFinal);
+          delay(3000);
+          memset(fraseDigitada, '\0', sizeof(fraseDigitada));
+          memset(fraseFinal, '\0', sizeof(fraseFinal));
+          indice = 0;
+          mostrarMenu();
+        }
       }else{
         if(emOp){
           opAtual = 0;
@@ -511,10 +531,11 @@ void executar(){
       indice = 0;
       mostrarOp();
     }else{
-      opAtual = indice + 1; //entra na opção de mensagem que você selecionou
+      emOp = true;
+      emSub = false;
       indice = 0;
-      mostrarMsg();
-      mostrarSubMensagem();
+      digitar = true; 
+      mostrarTeclado();
     }
   }else{
     menuAtual = indice + 1; //se menuAutal = 1 comunicação, se = 2 é de automção
