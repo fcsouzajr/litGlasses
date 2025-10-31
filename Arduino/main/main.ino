@@ -535,6 +535,7 @@ void executar(){
       emSub = false;
       indice = 0;
       digitar = true; 
+      Cell.println("OK");
       mostrarTeclado();
     }
   }else{
@@ -551,7 +552,7 @@ void executar(){
       Cell.println("AUT");
     }else{
       mostrarSubMensagem();
-      Cell.println("BTMSG");
+      Cell.println("MMSG");
     }
   }
 
@@ -578,20 +579,6 @@ void mostrarSubMensagem(){
   }
 
   memset(buffer, '\0', sizeof(buffer));
-}
-
-void mostrarMsg(){
-
-  oled.clear();
-
-  if(opAtual == 1){
-    Cell.println("Estou em perigo");
-    oled.print(F("Perigo"));
-  }else if(opAtual == 2){
-    Cell.println("Nescessito");
-    oled.print(F("Ajuda"));
-  }
-  delay(500);
 }
 
 void executarOp(){
