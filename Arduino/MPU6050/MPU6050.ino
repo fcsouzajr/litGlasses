@@ -50,11 +50,11 @@ void loop() {
   KalAngX = KalmanX.getAngle(roll, giroXAng, deltaT);
   KalAngY = KalmanY.getAngle(pitch, giroYAng, deltaT);
 
-  //Serial.print("°, Roll: ");
-  //Serial.println(roll);
-  //Serial.println("°");
-  //Serial.print("Filtro X");
-  //Serial.println(KalAngX);
+  Serial.print("°, Roll: ");
+  Serial.println(roll);
+  Serial.println("°");
+  Serial.print("Filtro X");
+  Serial.println(KalAngX);
   Serial.println(KalAngY);
 
 }
