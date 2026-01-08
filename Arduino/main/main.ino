@@ -66,52 +66,48 @@ opData Cozinha[] = {
 
 typedef void (*funcMain)(); //definindo uma função de ponteiro para ser de cada vetor da struct
 
-void funcAUTON();
-void funcTCLN();
-void funcSALA();
-void funcQRT1();
-void funcQRT2();
-void funcCZNH();
 void funcVM();
-void funcRL1Q1();
-void funcRL2Q1();
-void funcTVQ1();
-void funcRL1Q2();
-void funcRL2Q2();
-void funcTVQ2();
-void funcRL1CZ();
-void funcRL2CZ();
-void funcETRCZ();
-void funcRL1SL();
-void funcRL2SL();
-void funcTVSL();
 
 struct Comando{
   const char* nome;
   funcMain func;
 };
 
+//redução na redundância no código
+void sel0() { 
+  indice = 0; executar(); execut = true; 
+}
+void sel1() { 
+  indice = 1; executar(); execut = true; 
+}
+void sel2() { 
+  indice = 2; executar(); execut = true; 
+}
+void sel3() { 
+  indice = 3; executar(); execut = true; 
+}
+
 Comando cmds[] = {
-  {"AT", funcAUTON}, //comando para ir pro submenu automação
-  {"TC", funcTCLN}, //comando pra ir pro submenu de teclado
-  {"SA", funcSALA}, //comando para ir pras opções de sala
-  {"Q1", funcQRT1}, //comando para ir pras opções de quarto 1
-  {"Q2", funcQRT2}, //comando pra ir pras opções de quarto 2
-  {"CO", funcCZNH}, //comando pra ir pras opções da cozinha
-  {"VT", funcVM}, //comando para voltar pro menu principal
-  {"L1Q1", funcRL1Q1}, //comando para selecionar a opção de rele 1 de quarto 1
-  {"R1", funcRL2Q1}, //comando para selecionar a opção de rele 2 quarto 2
-  {"PQ1", funcTVQ1}, //comando para selecionar opção de TV do quarto 1
-  {"L1Q2", funcRL1Q2}, //comando para selecioar opção rele 1 quarto 2
-  {"R2", funcRL2Q2}, //comando para selecionar opção do rele 2 quarto 2
-  {"PQ2", funcTVQ2}, //comando para selecionar opção tv quarto 2
-  {"L1C", funcRL1CZ}, //comando para selecionar opção rele 1 cozinha
-  {"L2C", funcRL2CZ}, //comando para selecionar opção rele 2 cozinha
-  {"RC", funcETRCZ}, // comano para seleconar eletrodoméstico de cozinha
-  {"LS", funcRL1SL}, //comando para selecionar relé 1 sala
-  {"L2S", funcRL2SL}, //comando para selecionar relé 2 sala
-  {"RS", funcTVSL}, //comando para selecionar TV sala
-  {"VM", funcVM}
+  {"AT", sel1}, 
+  {"TC", sel0}, 
+  {"SA", sel0}, 
+  {"Q1", sel1},  
+  {"Q2", sel2},       
+  {"CO", sel3},  
+  {"VT", funcVM},
+  {"VM", funcVM},
+  {"L1Q1", sel0}, //opções que possuem indice 0
+  {"L1Q2", sel0}, 
+  {"L1C", sel0}, 
+  {"LS", sel0},  
+  {"R1",   sel1}, //opções que possuem indice 1
+  {"R2",   sel1}, 
+  {"L2C", sel1}, 
+  {"L2S", sel1},
+  {"PQ1",  sel2}, //opções que possuem indice 2
+  {"PQ2",  sel2}, 
+  {"RC",  sel2}, 
+  {"RS",  sel2} 
 };
 
 #define Menu_Total 3
@@ -701,122 +697,6 @@ void funcVM(){
   indice = 0;
 
   mostrarMenu();
-}
-
-void funcTCLN(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcAUTON(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-//==============================================================Quarto 1===========================================
-
-void funcQRT1(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcRL1Q1(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcRL2Q1(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcTVQ1(){
-  indice = 2;
-  executar();
-  execut = true;
-}
-
-//==============================================================Quarto 2===========================================
-
-void funcQRT2(){
-  indice = 2;
-  executar();
-  execut = true;
-}
-
-void funcRL1Q2(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcRL2Q2(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcTVQ2(){
-  indice = 2;
-  executar();
-  execut = true;
-}
-
-//==============================================================Cozinha===========================================
-
-void funcCZNH(){
-  indice = 3;
-  executar();
-  execut = true;
-}
-
-void funcRL1CZ(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcRL2CZ(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcETRCZ(){
-  indice = 2;
-  executar();
-  execut = true;
-}
-
-//==============================================================Sala===========================================
-
-void funcSALA(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcRL1SL(){
-  indice = 0;
-  executar();
-  execut = true;
-}
-
-void funcRL2SL(){
-  indice = 1;
-  executar();
-  execut = true;
-}
-
-void funcTVSL(){
-  indice = 2;
-  executar();
-  execut = true;
 }
 
 
