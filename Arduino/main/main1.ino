@@ -98,9 +98,24 @@ void setup() {
   pinMode(Bot, INPUT_PULLUP);
   pinMode(Bot2, INPUT_PULLUP);
   Keyboard.begin();
+  Serial.begin(9600);
 }
 
 void loop() {
   botDireita();
   botEsquerda();
+  
+  Serial.print("Bot Direita: ");
+  Serial.print(digitalRead(Bot) == LOW ? "PRESSIONADO" : "solto");
+  Serial.print(" | Cliques: ");
+  Serial.print(Contador);
+
+  Serial.print("    ||    ");
+
+  Serial.print("Bot Esquerda: ");
+  Serial.print(digitalRead(Bot2) == LOW ? "PRESSIONADO" : "solto");
+  Serial.print(" | Cliques: ");
+  Serial.println(Contador2);
+
+  delay(100);
 }
