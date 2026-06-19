@@ -14,7 +14,11 @@ uint8_t Motor[4] = {22, 23, 24, 25};
 
 float P, I, D, erroAnt, PID;
 
+<<<<<<< Updated upstream
 float Kp = 45.0, Kd = 10.0, Ki = 1.0;
+=======
+float Kp = 10.0, Kd = 1.5, Ki = 0.01;
+>>>>>>> Stashed changes
 
 uint8_t baseSpeed = 50;
 uint8_t Vd, Ve;
@@ -50,11 +54,15 @@ void loop() {
   digitalWrite(Motor[2], HIGH);
   digitalWrite(Motor[3], LOW);
 
+<<<<<<< Updated upstream
   dist_Drt = Ultra_Drt.read();
   dist_Esq = Ultra_Esq.read();
   dist_Mei = Ultra_Mei.read();
 
   float erro = (1.5*analogRead(A0) + 1*analogRead(A1)) - (1.5*analogRead(A3) + 1*analogRead(A2));
+=======
+  float erro = (1.1*analogRead(A0) + 0.5*analogRead(A1)) - (1.1*analogRead(A3) + 0.5*(analogRead(A2)));
+>>>>>>> Stashed changes
 
   P = erro;
   I = I + erro;
